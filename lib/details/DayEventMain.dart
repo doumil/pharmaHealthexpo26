@@ -1,6 +1,6 @@
-import 'package:emecexpo/tabs/FACEBOOK.dart';
-import 'package:emecexpo/tabs/INSTAGRAM.dart';
-import 'package:emecexpo/tabs/LINKEDIN.dart';
+import 'package:pharma_health_expo/tabs/FACEBOOK.dart';
+import 'package:pharma_health_expo/tabs/INSTAGRAM.dart';
+import 'package:pharma_health_expo/tabs/LINKEDIN.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

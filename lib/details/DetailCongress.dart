@@ -11,48 +11,48 @@
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 //
 // // Import your custom models
-// import 'package:emecexpo/model/user_model.dart';
-// import 'package:emecexpo/model/notification_model.dart';
+// import 'package:pharma_health_expo/model/user_model.dart';
+// import 'package:pharma_health_expo/model/notification_model.dart';
 //
 // // Import your custom screens and services
-// import 'package:emecexpo/login_screen.dart';
-// import 'package:emecexpo/home_screen.dart';
-// import 'package:emecexpo/my_drawer_header.dart';
-// import 'package:emecexpo/services/local_notification_service.dart';
-// import 'package:emecexpo/my_profile_screen.dart';
+// import 'package:pharma_health_expo/login_screen.dart';
+// import 'package:pharma_health_expo/home_screen.dart';
+// import 'package:pharma_health_expo/my_drawer_header.dart';
+// import 'package:pharma_health_expo/services/local_notification_service.dart';
+// import 'package:pharma_health_expo/my_profile_screen.dart';
 //
 // // IMPORTANT: Ensure these files exist in your project in the specified paths!
-// import 'package:emecexpo/app_user_guide_screen.dart';
-// import 'package:emecexpo/my_badge_screen.dart';
-// import 'package:emecexpo/favourites_screen.dart';
-// import 'package:emecexpo/scanned_badges_screen.dart';
-// import 'package:emecexpo/conversations_screen.dart';
-// import 'package:emecexpo/meeting_ratings_screen.dart';
-// import 'package:emecexpo/Busniess%20Safe.dart';
-// import 'package:emecexpo/Congress.dart';
-// import 'package:emecexpo/Contact.dart';
-// import 'package:emecexpo/Exhibitors.dart';
-// import 'package:emecexpo/Expo%20Floor%20Plan.dart';
-// import 'package:emecexpo/Food.dart';
-// import 'package:emecexpo/How%20to%20get%20there.dart';
-// import 'package:emecexpo/Information.dart';
-// import 'package:emecexpo/Media%20Partners.dart';
-// import 'package:emecexpo/News.dart';
-// import 'package:emecexpo/Notifications.dart';
-// import 'package:emecexpo/Official%20events.dart';
-// import 'package:emecexpo/Settings.dart';
-// import 'package:emecexpo/Social%20Media.dart';
-// import 'package:emecexpo/Speakers.dart';
-// import 'package:emecexpo/details/DetailCongress.dart';
-// import 'package:emecexpo/details/DetailNetworkin.dart';
-// import 'package:emecexpo/partners.dart';
-// import 'package:emecexpo/product.dart';
-// import 'package:emecexpo/Activities.dart';
-// import 'package:emecexpo/My%20Agenda.dart';
-// import 'package:emecexpo/Suporting%20Partners.dart';
-// import 'package:emecexpo/details/CongressMenu.dart';
-// import 'package:emecexpo/Schedule.dart';
-// import 'package:emecexpo/networking.dart';
+// import 'package:pharma_health_expo/app_user_guide_screen.dart';
+// import 'package:pharma_health_expo/my_badge_screen.dart';
+// import 'package:pharma_health_expo/favourites_screen.dart';
+// import 'package:pharma_health_expo/scanned_badges_screen.dart';
+// import 'package:pharma_health_expo/conversations_screen.dart';
+// import 'package:pharma_health_expo/meeting_ratings_screen.dart';
+// import 'package:pharma_health_expo/Busniess%20Safe.dart';
+// import 'package:pharma_health_expo/Congress.dart';
+// import 'package:pharma_health_expo/Contact.dart';
+// import 'package:pharma_health_expo/Exhibitors.dart';
+// import 'package:pharma_health_expo/Expo%20Floor%20Plan.dart';
+// import 'package:pharma_health_expo/Food.dart';
+// import 'package:pharma_health_expo/How%20to%20get%20there.dart';
+// import 'package:pharma_health_expo/Information.dart';
+// import 'package:pharma_health_expo/Media%20Partners.dart';
+// import 'package:pharma_health_expo/News.dart';
+// import 'package:pharma_health_expo/Notifications.dart';
+// import 'package:pharma_health_expo/Official%20events.dart';
+// import 'package:pharma_health_expo/Settings.dart';
+// import 'package:pharma_health_expo/Social%20Media.dart';
+// import 'package:pharma_health_expo/Speakers.dart';
+// import 'package:pharma_health_expo/details/DetailCongress.dart';
+// import 'package:pharma_health_expo/details/DetailNetworkin.dart';
+// import 'package:pharma_health_expo/partners.dart';
+// import 'package:pharma_health_expo/product.dart';
+// import 'package:pharma_health_expo/Activities.dart';
+// import 'package:pharma_health_expo/My%20Agenda.dart';
+// import 'package:pharma_health_expo/Suporting%20Partners.dart';
+// import 'package:pharma_health_expo/details/CongressMenu.dart';
+// import 'package:pharma_health_expo/Schedule.dart';
+// import 'package:pharma_health_expo/networking.dart';
 //
 //
 // // Global ValueNotifier to hold the current notification count for UI updates

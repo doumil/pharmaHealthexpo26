@@ -1,7 +1,7 @@
 // lib/messages_screen.dart
 import 'package:flutter/material.dart';
-import 'package:emecexpo/model/message_model.dart'; // Using your package name
-import 'package:emecexpo/model/scanned_badge_model.dart'; // Import ScannedBadge model
+import 'package:pharma_health_expo/model/message_model.dart'; // Using your package name
+import 'package:pharma_health_expo/model/scanned_badge_model.dart'; // Import ScannedBadge model
 import 'package:shared_preferences/shared_preferences.dart';
 
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:emecexpo/model/app_theme_data.dart';
-import 'package:emecexpo/model/commerciaux_model.dart';
-import 'package:emecexpo/api_services/networking_api_service.dart';
+import 'package:pharma_health_expo/model/app_theme_data.dart';
+import 'package:pharma_health_expo/model/commerciaux_model.dart';
+import 'package:pharma_health_expo/api_services/networking_api_service.dart';
 
 class CommerciauxScreen extends StatefulWidget {
   final int exposantId;

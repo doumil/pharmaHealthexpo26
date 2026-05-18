@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 import 'model/app_theme_data.dart';
 import 'model/product_model.dart';
 import 'package:http/http.dart' as http;

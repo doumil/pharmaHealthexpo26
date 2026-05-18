@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
-import 'package:emecexpo/model/user_model.dart';
-import 'package:emecexpo/main.dart'; // Assuming WelcomPage is defined here
+import 'package:pharma_health_expo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/model/user_model.dart';
+import 'package:pharma_health_expo/main.dart'; // Assuming WelcomPage is defined here
 import 'package:url_launcher/url_launcher.dart';
 import 'api_services/auth_api_service.dart'; // Contains sendVerificationCode, verifyCode, and NEW: forgetPassword
 import 'model/app_theme_data.dart'; // Assuming this defines your theme structure

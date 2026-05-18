@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:emecexpo/model/notification_model.dart'; // Import your NotifClass model
+import 'package:pharma_health_expo/model/notification_model.dart'; // Import your NotifClass model
 
 class NotificationDetailScreen extends StatelessWidget {
   final NotifClass notification;

@@ -2,14 +2,14 @@
 // import 'dart:convert';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:animate_do/animate_do.dart';
-// import 'package:emecexpo/services/local_notification_service.dart';
+// import 'package:pharma_health_expo/services/local_notification_service.dart';
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:get/get.dart';
 // import 'package:mobile_scanner/mobile_scanner.dart';
 // import 'package:http/http.dart' as http;
-// import 'package:emecexpo/services/onwillpop_services.dart';
+// import 'package:pharma_health_expo/services/onwillpop_services.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:app_settings/app_settings.dart';
 // //import 'package:flutter_mute/flutter_mute.dart';

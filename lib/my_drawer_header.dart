@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
-import 'package:emecexpo/model/user_model.dart';
-import 'package:emecexpo/model/app_theme_data.dart'; // Import AppThemeData to use theme structure
+import 'package:pharma_health_expo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/model/user_model.dart';
+import 'package:pharma_health_expo/model/app_theme_data.dart'; // Import AppThemeData to use theme structure
 
 class MyHeaderDrawer extends StatefulWidget {
   final User? user;

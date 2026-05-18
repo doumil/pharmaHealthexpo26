@@ -1,12 +1,12 @@
 // lib/media_p_screen.dart
 
 import 'package:animate_do/animate_do.dart';
-import 'package:emecexpo/sponsors/mediapartnersData.dart';
+import 'package:pharma_health_expo/sponsors/mediapartnersData.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; // 💡 Import Provider
-import 'package:emecexpo/providers/theme_provider.dart'; // 💡 Import your ThemeProvider
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import your ThemeProvider
 
 class MediaPScreen extends StatefulWidget {
   const MediaPScreen({Key? key}) : super(key: key);

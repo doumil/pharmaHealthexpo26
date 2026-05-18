@@ -3,9 +3,9 @@ import 'package:animate_do/animate_do.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import Provider
-import 'package:emecexpo/model/notification_model.dart';
-import 'package:emecexpo/main.dart';
-import 'package:emecexpo/providers/theme_provider.dart'; // Import your ThemeProvider
+import 'package:pharma_health_expo/model/notification_model.dart';
+import 'package:pharma_health_expo/main.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // Import your ThemeProvider
 import 'details/notification_detail_screen.dart';
 import 'home_screen.dart';
 

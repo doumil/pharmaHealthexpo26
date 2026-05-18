@@ -7,12 +7,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
 // NOTE: Assuming these imports exist and are correct
-import 'package:emecexpo/services/onwillpop_services.dart';
-import 'package:emecexpo/constants.dart'; // Should contain DrawerSections enum
-import 'package:emecexpo/model/user_model.dart';
-import 'package:emecexpo/login_screen.dart';
-import 'package:emecexpo/providers/menu_provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/services/onwillpop_services.dart';
+import 'package:pharma_health_expo/constants.dart'; // Should contain DrawerSections enum
+import 'package:pharma_health_expo/model/user_model.dart';
+import 'package:pharma_health_expo/login_screen.dart';
+import 'package:pharma_health_expo/providers/menu_provider.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 import 'model/app_theme_data.dart'; // Assuming AppThemeData is defined here or accessible
 
 // --- HELPER CLASS FOR MENU ITEMS ---

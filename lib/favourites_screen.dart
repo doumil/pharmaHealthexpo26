@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart'; // 💡 Import Provider
-import 'package:emecexpo/providers/theme_provider.dart'; // 💡 Import ThemeProvider
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import ThemeProvider
 import '../model/favorite_item_model.dart';
 import 'main.dart';
 import 'model/app_theme_data.dart';

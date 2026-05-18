@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:emecexpo/api_services/event_contact_api_service.dart';
-import 'package:emecexpo/model/event_contact_model.dart';
-import 'package:emecexpo/model/organizer_model.dart';
+import 'package:pharma_health_expo/api_services/event_contact_api_service.dart';
+import 'package:pharma_health_expo/model/event_contact_model.dart';
+import 'package:pharma_health_expo/model/organizer_model.dart';
 
 // Assuming these are defined elsewhere in your project
 import '../providers/theme_provider.dart';

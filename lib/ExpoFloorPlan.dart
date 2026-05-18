@@ -8,8 +8,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Assuming this is needed for icons
 
 // Assuming these files exist based on prior conversations
-import 'package:emecexpo/api_services/plan_api_service.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/api_services/plan_api_service.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 
 import 'main.dart'; // For WelcomPage
 

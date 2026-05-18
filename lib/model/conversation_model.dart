@@ -1,6 +1,6 @@
 // lib/model/conversation_model.dart
-import 'package:emecexpo/model/message_model.dart'; // Import Message model
-import 'package:emecexpo/model/scanned_badge_model.dart'; // Import ScannedBadge model
+import 'package:pharma_health_expo/model/message_model.dart'; // Import Message model
+import 'package:pharma_health_expo/model/scanned_badge_model.dart'; // Import ScannedBadge model
 
 class Conversation {
   final ScannedBadge participant; // The other person in this conversation

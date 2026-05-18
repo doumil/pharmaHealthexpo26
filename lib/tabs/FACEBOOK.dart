@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:emecexpo/providers/theme_provider.dart'; // Make sure this path is correct
-import 'package:emecexpo/model/app_theme_data.dart'; // Assuming your AppThemeData is here
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // Make sure this path is correct
+import 'package:pharma_health_expo/model/app_theme_data.dart'; // Assuming your AppThemeData is here
 
 class FacebookScreen extends StatelessWidget {
   const FacebookScreen({super.key});

@@ -1,5 +1,5 @@
 // import 'package:animate_do/animate_do.dart';
-// import 'package:emecexpo/model/congress_model_detail.dart';
+// import 'package:pharma_health_expo/model/congress_model_detail.dart';
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
@@ -10,7 +10,7 @@
 // import '../../services/local_notification_service.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:add_2_calendar/add_2_calendar.dart';
-// import 'package:emecexpo/model/notification_model.dart';
+// import 'package:pharma_health_expo/model/notification_model.dart';
 //
 // class CreneauScreen extends StatefulWidget {
 //   bool check;

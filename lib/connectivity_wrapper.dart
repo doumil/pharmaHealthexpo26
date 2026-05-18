@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Import your existing ThemeProvider for consistent styling
-import 'package:emecexpo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 
 
 // -----------------------------------------------------------------------------

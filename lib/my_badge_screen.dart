@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart'; // Import Provider
-import 'package:emecexpo/providers/theme_provider.dart'; // Import ThemeProvider
-import 'package:emecexpo/model/user_model.dart';
-import 'package:emecexpo/model/app_theme_data.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // Import ThemeProvider
+import 'package:pharma_health_expo/model/user_model.dart';
+import 'package:pharma_health_expo/model/app_theme_data.dart';
 
 import 'main.dart'; // Assuming this defines your theme structure
 

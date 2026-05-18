@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart'; // 💡 Import Provider
-import 'package:emecexpo/providers/theme_provider.dart'; // 💡 Import your ThemeProvider
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import your ThemeProvider
 
 class GetThereScreen extends StatefulWidget {
   const GetThereScreen({Key? key}) : super(key: key);

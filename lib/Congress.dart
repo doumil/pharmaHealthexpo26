@@ -8,7 +8,7 @@ import 'package:provider/provider.dart'; // Import Provider
 import 'package:http/http.dart' as http; // Kept in case you reactivate API calls
 
 // Import your providers and models
-import 'package:emecexpo/providers/theme_provider.dart'; // 💡 Import ThemeProvider
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import ThemeProvider
 import 'details/CongressMenu.dart';
 import 'model/app_theme_data.dart';
 import 'model/congress_model.dart';

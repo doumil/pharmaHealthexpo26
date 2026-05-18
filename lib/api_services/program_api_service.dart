@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:emecexpo/model/program_model.dart';
+import 'package:pharma_health_expo/model/program_model.dart';
 
 class ProgramApiService {
   // Use the API endpoint you provided

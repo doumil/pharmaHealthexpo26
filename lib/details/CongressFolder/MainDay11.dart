@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:emecexpo/model/exhibitors_model.dart';
+import 'package:pharma_health_expo/model/exhibitors_model.dart';
 import '../../model/congress_model_detail.dart';
 import '../DetailCongress.dart';
 class MainDay11Screen extends StatefulWidget {

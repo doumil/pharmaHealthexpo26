@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:emecexpo/main.dart';
+import 'package:pharma_health_expo/main.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
-import 'package:emecexpo/model/notification_model.dart';
-import 'package:emecexpo/model/congress_model_detail.dart';
+import 'package:pharma_health_expo/model/notification_model.dart';
+import 'package:pharma_health_expo/model/congress_model_detail.dart';
 
 class DataBaseHelperNotif{
   final String notifTable = 'notificationtable';

@@ -4,11 +4,11 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:emecexpo/model/exhibitors_model.dart';
+import 'package:pharma_health_expo/model/exhibitors_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Import the API service
-import 'package:emecexpo/api_services/exhibitor_api_service.dart';
+import 'package:pharma_health_expo/api_services/exhibitor_api_service.dart';
 
 class DetailExhibitorsScreen extends StatefulWidget {
   final int exhibitorId; // Receives the exhibitor ID

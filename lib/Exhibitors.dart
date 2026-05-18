@@ -3,20 +3,20 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
-import 'package:emecexpo/details/ExhibitorsMenu.dart';
+import 'package:pharma_health_expo/details/ExhibitorsMenu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 // 💡 IMPORTANT: Import CachedNetworkImage
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:emecexpo/model/exhibitors_model.dart';
-import 'package:emecexpo/api_services/exhibitor_api_service.dart';
-import 'package:emecexpo/details/DetailExhibitors.dart';
+import 'package:pharma_health_expo/model/exhibitors_model.dart';
+import 'package:pharma_health_expo/api_services/exhibitor_api_service.dart';
+import 'package:pharma_health_expo/details/DetailExhibitors.dart';
 
 import 'main.dart';
 import 'model/app_theme_data.dart';

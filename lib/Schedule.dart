@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart'; // Make sure this is the correct path
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // Make sure this is the correct path
 import 'model/app_theme_data.dart'; // This is needed to access your theme colors
 
 class SchelduleScreen extends StatefulWidget {

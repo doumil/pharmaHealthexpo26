@@ -2,9 +2,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
-import 'package:emecexpo/model/user_model.dart';
-import 'package:emecexpo/login_screen.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/model/user_model.dart';
+import 'package:pharma_health_expo/login_screen.dart';
 
 import 'main.dart'; // Contains WelcomPage
 import 'model/app_theme_data.dart'; // Contains AppThemeData

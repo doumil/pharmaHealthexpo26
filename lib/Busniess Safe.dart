@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:provider/provider.dart'; // Import Provider
-import 'package:emecexpo/providers/theme_provider.dart'; // Import ThemeProvider
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // Import ThemeProvider
 
 class BusinessScreen extends StatefulWidget {
   const BusinessScreen({Key? key}) : super(key: key);

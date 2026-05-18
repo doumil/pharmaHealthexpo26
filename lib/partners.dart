@@ -8,10 +8,10 @@ import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 // import 'package:cached_network_image/cached_network_image.dart'; // Using Image.network instead for unified fallback
 
-import 'package:emecexpo/providers/theme_provider.dart';
-import 'package:emecexpo/model/exhibitors_model.dart';
-import 'package:emecexpo/api_services/exhibitor_api_service.dart';
-import 'package:emecexpo/model/app_theme_data.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/model/exhibitors_model.dart';
+import 'package:pharma_health_expo/api_services/exhibitor_api_service.dart';
+import 'package:pharma_health_expo/model/app_theme_data.dart';
 
 import 'details/DetailExhibitors.dart';
 import 'main.dart'; // Assuming this imports WelcomPage

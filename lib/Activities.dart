@@ -7,7 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart'; // Import Provider
-import 'package:emecexpo/providers/theme_provider.dart'; // Import ThemeProvider
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // Import ThemeProvider
 
 import 'model/congress_model.dart';
 import 'model/activities_model.dart';

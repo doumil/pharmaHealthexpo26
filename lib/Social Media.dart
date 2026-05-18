@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart'; // 💡 Import Provider
-import 'package:emecexpo/providers/theme_provider.dart'; // 💡 Import your ThemeProvider
+import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import your ThemeProvider
 import 'main.dart';
 import 'model/app_theme_data.dart'; // 💡 Import your AppThemeData
-import 'package:emecexpo/tabs/FACEBOOK.dart';
-import 'package:emecexpo/tabs/INSTAGRAM.dart';
-import 'package:emecexpo/tabs/LINKEDIN.dart';
+import 'package:pharma_health_expo/tabs/FACEBOOK.dart';
+import 'package:pharma_health_expo/tabs/INSTAGRAM.dart';
+import 'package:pharma_health_expo/tabs/LINKEDIN.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 

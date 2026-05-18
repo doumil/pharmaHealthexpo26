@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:emecexpo/model/sponsor_model.dart';
+import 'package:pharma_health_expo/model/sponsor_model.dart';
 
 class SponsorApiService {
   static const String _sponsorUrl = 'https://buzzevents.co/api/sponosors';

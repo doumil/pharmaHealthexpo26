@@ -1,10 +1,10 @@
 // lib/exhibitors_menu.dart or similar file
 
-import 'package:emecexpo/Activities.dart';
-import 'package:emecexpo/Exhibitors.dart'; // Make sure this imports your ExhibitorsScreen class
-import 'package:emecexpo/News.dart';
-import 'package:emecexpo/product.dart';
-import 'package:emecexpo/main.dart';
+import 'package:pharma_health_expo/Activities.dart';
+import 'package:pharma_health_expo/Exhibitors.dart'; // Make sure this imports your ExhibitorsScreen class
+import 'package:pharma_health_expo/News.dart';
+import 'package:pharma_health_expo/product.dart';
+import 'package:pharma_health_expo/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +12,7 @@ import '../my_drawer_header.dart';
 
 // 💡 Imports for dynamic theming (ensuring they remain)
 import 'package:provider/provider.dart';
-import 'package:emecexpo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 // Ensure AppThemeData is available
 
 class ExhibitorDScreen extends StatefulWidget {

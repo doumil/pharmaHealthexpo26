@@ -1,10 +1,10 @@
 // import 'package:flutter/material.dart';
-// import 'package:emecexpo/model/conversation_model.dart';
-// import 'package:emecexpo/model/scanned_badge_model.dart';
-// import 'package:emecexpo/model/message_model.dart';
-// import 'package:emecexpo/messages_screen.dart';
+// import 'package:pharma_health_expo/model/conversation_model.dart';
+// import 'package:pharma_health_expo/model/scanned_badge_model.dart';
+// import 'package:pharma_health_expo/model/message_model.dart';
+// import 'package:pharma_health_expo/messages_screen.dart';
 // import 'package:provider/provider.dart'; // 💡 Import Provider
-// import 'package:emecexpo/providers/theme_provider.dart'; // 💡 Import ThemeProvider
+// import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import ThemeProvider
 // import 'package:shared_preferences/shared_preferences.dart';
 //
 // import 'main.dart';

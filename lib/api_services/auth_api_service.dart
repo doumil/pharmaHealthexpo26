@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:emecexpo/model/user_model.dart';
+import 'package:pharma_health_expo/model/user_model.dart';
 
 class AuthApiService {
   static const String _baseUrl = "https://www.buzzevents.co/api";

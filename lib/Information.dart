@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; // 💡 Import Provider
-import 'package:emecexpo/providers/theme_provider.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 
 import 'model/app_theme_data.dart'; // 💡 Import your ThemeProvider
 

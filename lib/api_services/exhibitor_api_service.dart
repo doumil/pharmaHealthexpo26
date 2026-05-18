@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:emecexpo/model/exhibitors_model.dart'; // Ensure this path is correct
+import 'package:pharma_health_expo/model/exhibitors_model.dart'; // Ensure this path is correct
 
 class ExhibitorApiService {
   // Use the provided API URL for edition 1118
