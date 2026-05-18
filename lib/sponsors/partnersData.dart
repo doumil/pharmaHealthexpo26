@@ -1,0 +1,43 @@
+const PARTNERS_DATA= [
+  {
+    "image1":"assets/partners/1.png",
+    "image2":"assets/partners/2.png"
+  },
+  {
+    "image1":"assets/partners/3.png",
+    "image2":"assets/partners/4.png"
+  },
+  {
+    "image1":"assets/partners/5.png",
+    "image2":"assets/partners/6.png"
+  },
+  {
+    "image1":"assets/partners/7.png",
+    "image2":"assets/partners/8.png"
+  },
+  {
+    "image1":"assets/partners/9.png",
+    "image2":"assets/partners/10.png"
+  },
+  {
+    "image1":"assets/partners/11.png",
+    "image2":"assets/partners/12.png"
+  },
+  {
+    "image1":"assets/partners/13.png",
+    "image2":"assets/partners/14.png"
+  },
+  {
+    "image1":"assets/partners/15.png",
+    "image2":"assets/partners/16.png"
+  },
+  {
+    "image1":"assets/partners/17.png",
+    "image2":"assets/partners/18.png"
+  },
+  {
+    "image1":"assets/partners/19.png",
+    "image2":"assets/partners/20.png",
+  },
+];
+
