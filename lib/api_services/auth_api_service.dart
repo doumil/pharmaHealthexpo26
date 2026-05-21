@@ -1,12 +1,17 @@
+// lib/services/auth_api_service.dart
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pharma_health_expo/model/user_model.dart';
+import '../global/app_config.dart';
+// 💡 إستيراد الـ Config الجلوبال
 
 class AuthApiService {
-  static const String _baseUrl = "https://www.buzzevents.co/api";
-  static const int _editionId = 1118;
-  static const String _apiKey = '1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7';
+  // 🌐 1. تعويض الروابط والمتغيرات بـ الجلوبال ديريكت
+  static final String _baseUrl = "${AppConfig.baseUrl}/api";
+  static final String _editionId = AppConfig.editionId; // 💡 غاتقرأ 1133 الديناميكية
+  static final String _apiKey = AppConfig.apiKey;       // 💡 غاتقرأ الـ Key الموحد
 
   // -------------------------------------------------------------------------
   // STEP 1: Send Verification Code to Gmail
@@ -15,6 +20,7 @@ class AuthApiService {
     final Uri uri = Uri.parse('$_baseUrl/event/edition/$_editionId/sendVerificationCode/AppMobile');
 
     try {
+      print('DEBUG: Step 1 Request to: $uri');
       final response = await http.post(
         uri,
         headers: {
@@ -39,6 +45,7 @@ class AuthApiService {
         };
       }
     } catch (e) {
+      print('DEBUG: Step 1 Exception: $e');
       return {'success': false, 'message': 'Network error in Step 1.'};
     }
   }
@@ -50,6 +57,7 @@ class AuthApiService {
     final Uri uri = Uri.parse('$_baseUrl/verifyVerificationCode/AppMobile');
 
     try {
+      print('DEBUG: Step 2 Request to: $uri');
       final response = await http.post(
         uri,
         headers: {
@@ -60,21 +68,18 @@ class AuthApiService {
         body: jsonEncode({
           'email': email,
           'verification_code': code,
-          'editionId': _editionId,
+          'editionId': int.tryParse(_editionId) ?? 1133, // تحويل لـ int حيت السيرفر كيبغيها رقم ف هاد الـ body
         }),
       );
 
       final Map<String, dynamic> responseData = json.decode(response.body);
 
       if (response.statusCode == 200 && responseData['status'] == 'success') {
-        // Extract the temporary "small" token
         String smallToken = responseData['user']['token'];
-        // Extract QR code from the order object
         String qrCodeXml = responseData['order'] != null ? responseData['order']['qrcode'] : "";
 
         print("DEBUG: Step 2 Success. Small Token: $smallToken");
 
-        // 🚀 PROCEED TO STEP 3: Exchange for Full JWT using GET
         return await _getFinalFullToken(smallToken, responseData['user'], qrCodeXml);
       } else {
         return {
@@ -83,6 +88,7 @@ class AuthApiService {
         };
       }
     } catch (e) {
+      print('DEBUG: Step 2 Exception: $e');
       return {'success': false, 'message': 'Verification failed (Step 2).'};
     }
   }
@@ -91,10 +97,10 @@ class AuthApiService {
   // STEP 3: Exchange Small Token for Full Token (JWT) via GET
   // -------------------------------------------------------------------------
   Future<Map<String, dynamic>> _getFinalFullToken(String smallToken, Map<String, dynamic> userMap, String qrCode) async {
-
-    // We encode the token because it contains special characters like '$' and '/'
     final String encodedToken = Uri.encodeComponent(smallToken.trim());
-    final String url = 'https://buzzevents.co/api/login/link?tokenus=$encodedToken';
+
+    // 💡 عودناها بـ AppConfig.baseUrl باش تحيد www ويتحسن الأداء والموثوقية
+    final String url = '${AppConfig.baseUrl}/api/login/link?tokenus=$encodedToken';
     final Uri uri = Uri.parse(url);
 
     try {
@@ -115,13 +121,11 @@ class AuthApiService {
         final Map<String, dynamic> linkData = json.decode(response.body);
 
         if (linkData.containsKey('token')) {
-          String fullJwtToken = linkData['token']; // The eyJ... token
+          String fullJwtToken = linkData['token'];
 
-          // Replace small token with Full JWT in user object
           userMap['token'] = fullJwtToken;
           final User user = User.fromJson(userMap);
 
-          // Persistent Storage
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('authToken', fullJwtToken);
           await prefs.setString('currentUserJson', jsonEncode(userMap));

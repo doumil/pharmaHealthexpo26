@@ -57,14 +57,14 @@ dependencies:
   animated_splash_screen: any
 
 flutter_native_splash:
-  image: assets/logo15.png
-  color: "#261350"
+  image: "assets/PHARMA-HEALTH-EXPO-LOGO.png"
+  #color: "#261350"
   android_gravity: center
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/ICON-EMEC.png" # Path to your logo image
+  image_path: "assets/pharmaIcon.png" # Path to your logo image
   min_sdk_android: 21
 
 dev_dependencies:
@@ -83,19 +83,4 @@ flutter:
 
   assets:
     - assets/
-    - assets/partners/
-    - assets/sponsors/
-    - assets/slides/
-    - assets/sponsors/sponsors2023/
-    - assets/sponsors/sponsors2024/
-    - assets/sponsors/sponsors2024/Bronze/
-    - assets/sponsors/sponsors2024/Gold/
-    - assets/sponsors/sponsors2024/platinum/
-    - assets/sponsors/sponsors2024/StrategicPartner/
-    - assets/speakers/
-    - assets/Comercials/
-    - assets/speakers/speakers2024/
-    - assets/Comercials/Comercials2024/
-    - assets/safety/
-    - assets/service_account.json
     - assets/icons/

@@ -1,64 +1,70 @@
+// lib/providers/theme_provider.dart
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:io'; // New import for SocketException
+import 'dart:io';
 
+import 'package:pharma_health_expo/global/app_config.dart';
 import '../model/app_theme_data.dart';
-// Note: You have two imports for the same file. You should remove one.
-// import '../model/app_theme_data.dart';
 
 class ThemeProvider with ChangeNotifier {
-  // Set the default theme to ensure the app has colors even if the API fails.
-  AppThemeData _currentTheme = AppThemeData(
-    primaryColor: const Color(0xff261350),
-    secondaryColor: const Color(0xff00C1C1),
-    blackColor: Colors.black,
-    whiteColor: Colors.white,
-    redColor: Colors.red,
-  );
+  // Always initialize with secure default system properties
+  AppThemeData _currentTheme = AppThemeData.defaultTheme();
 
   AppThemeData get currentTheme => _currentTheme;
 
+  /// Loads locally stored theme preferences from SharedPreferences if cache integrity checks pass.
+  Future<void> loadCachedTheme() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? cachedTheme = prefs.getString('cached_theme_data');
+
+      if (cachedTheme != null) {
+        final Map<String, dynamic> jsonData = json.decode(cachedTheme);
+
+        if (jsonData.containsKey('primary_color') || jsonData.containsKey('badge')) {
+          _currentTheme = AppThemeData.fromApi(jsonData);
+          notifyListeners();
+          debugPrint("📦 [ThemeProvider] Fallback: Cached theme loaded successfully into memory.");
+        } else {
+          debugPrint("ℹ️ [ThemeProvider] Outdated cache structure detected. Keeping default values.");
+        }
+      }
+    } catch (e) {
+      debugPrint("⚠️ [ThemeProvider] Error loading cached theme: $e");
+    }
+  }
+
+  /// Fetches layout parameters from remote endpoint. Falls back to local cache or defaults on failure.
   Future<void> fetchThemeFromApi() async {
-    const url = 'https://buzzevents.co/api/events/10/app-settings';
-    debugPrint("🔍 Attempting to fetch theme from API: $url");
+    final String url = '${AppConfig.baseUrl}/api/events/${AppConfig.eventId}/app-settings';
+    debugPrint("🔍 [ThemeProvider] Fetching theme configurations from: $url");
 
     try {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        debugPrint("✅ API request successful (Status 200). Parsing data...");
         final Map<String, dynamic> jsonData = json.decode(response.body);
 
-        if (jsonData.containsKey('data')) {
+        if (jsonData.containsKey('data') && jsonData['data'] != null) {
           _currentTheme = AppThemeData.fromApi(jsonData['data']);
           notifyListeners();
-          debugPrint("🚀 Theme updated successfully.");
+          debugPrint("🚀 [ThemeProvider] Theme updated successfully from live API configuration.");
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('cached_theme_data', json.encode(jsonData['data']));
         } else {
-          // If "data" key is missing, throw a specific exception.
-          throw const FormatException("API response is missing the 'data' key.");
+          throw const FormatException("API missing target structure 'data' key.");
         }
       } else {
-        // If the server returns an error status code.
-        debugPrint("⚠️ API request failed with status code: ${response.statusCode}");
-        throw HttpException('Failed to load theme data from API. Status Code: ${response.statusCode}');
+        throw HttpException('Remote status host issue: ${response.statusCode}');
       }
-    } on SocketException catch (e) {
-      // ❌ Catches network-related errors (no internet, host unreachable).
-      debugPrint("❌ Network error: Could not connect to host. Exception: $e");
-      // App will use the default theme.
-    } on FormatException catch (e) {
-      // ❌ Catches JSON parsing errors (malformed JSON).
-      debugPrint("❌ JSON parsing error: API response is not a valid JSON. Exception: $e");
-      // App will use the default theme.
-    } on HttpException catch (e) {
-      // ❌ Catches HTTP errors (non-200 status codes).
-      debugPrint("❌ HTTP Error: $e");
-      // App will use the default theme.
     } catch (e) {
-      // ❌ Catches all other unexpected errors.
-      debugPrint("❌ An unexpected error occurred: $e");
-      // App will use the default theme.
+      debugPrint("⚠️ [ThemeProvider] API Fetch failed ($e). Redirecting to client cache records...");
+      // 💡 Strict Fallback Sequence: If the API breaks down, read from disk immediately
+      await loadCachedTheme();
     }
   }
 }
