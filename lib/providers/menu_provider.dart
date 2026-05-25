@@ -1,9 +1,20 @@
-// lib/providers/menu_provider.dart
-
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:pharma_health_expo/global/app_config.dart';
+import 'package:pharma_health_expo/providers/app_config_provider.dart';
+import 'package:pharma_health_expo/constants.dart'; // تأكد من الـ Import ديال DrawerSections
+
+class MenuItem {
+  final String title;
+  final IconData icon;
+  final DrawerSections section;
+  final bool isCustomCard;
+
+  MenuItem({
+    required this.title,
+    required this.icon,
+    required this.section,
+    this.isCustomCard = false,
+  });
+}
 
 class MenuConfig {
   final bool floorPlan;
@@ -15,7 +26,6 @@ class MenuConfig {
   final bool badge;
   final bool products;
   final bool networking;
-  final bool congresses;
 
   MenuConfig({
     this.floorPlan = true,
@@ -27,26 +37,17 @@ class MenuConfig {
     this.badge = true,
     this.products = true,
     this.networking = true,
-    this.congresses = true,
   });
 
-  factory MenuConfig.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] as Map<String, dynamic>? ?? {};
-
-    // Guard fallback function: defaults to true if the feature key is missing or null
+  factory MenuConfig.fromRawData(Map<String, dynamic> data) {
     bool getValue(String key) {
-      if (!data.containsKey(key) || data[key] == null) {
-        return true;
-      }
-
       final value = data[key];
-      if (value is bool) {
-        return value;
-      }
+      if (value == null) return true;
+      if (value is bool) return value;
       if (value is Map && value.containsKey('enabled')) {
         return value['enabled'] == true;
       }
-      return value == '1' || value == 1 || value.toString().toLowerCase() == 'true';
+      return value.toString() == '1' || value.toString().toLowerCase() == 'true';
     }
 
     return MenuConfig(
@@ -59,35 +60,53 @@ class MenuConfig {
       badge: getValue('badge'),
       products: getValue('products'),
       networking: getValue('networking'),
-      congresses: getValue('congresses') || data.containsKey('conferences') ? getValue('conferences') : true,
     );
   }
 }
 
 class MenuProvider with ChangeNotifier {
-  // Pre-populated with default configurations to eliminate secondary visual layout shifts
-  MenuConfig _menuConfig = MenuConfig();
-  MenuConfig get menuConfig => _menuConfig;
+  MenuConfig? _menuConfig;
+  MenuConfig? get menuConfig => _menuConfig;
 
-  /// Fetches and updates dynamic menu visibility rules from global configuration settings
-  Future<void> fetchMenuConfig() async {
-    // 🔗 Centralized dynamic endpoint path configuration
-    final String apiUrl = '${AppConfig.baseUrl}/api/events/${AppConfig.eventId}/app-settings';
-    debugPrint("🔍 [MenuProvider] Fetching layout settings from: $apiUrl");
+  List<MenuItem> _visibleItems = [];
+  List<MenuItem> get visibleItems => _visibleItems;
 
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
+  /// هاد الميثود كتستقبل الداتا من AppConfigProvider وكتحدث القائمة وتصفيها أوتوماتيكياً
+  void updateMenuFromConfig(AppConfigProvider configProvider) {
+    final Map<String, dynamic>? data = configProvider.rawSettings;
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        _menuConfig = MenuConfig.fromJson(jsonResponse);
-        debugPrint("✅ [MenuProvider] MenuConfig unified with Fallback logic successfully!");
-      } else {
-        debugPrint('⚠️ [MenuProvider] Server Error: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('❌ [MenuProvider] Connection Error: $e');
+    if (data != null) {
+      _menuConfig = MenuConfig.fromRawData(data);
+      _generateVisibleItems();
+      notifyListeners();
+      debugPrint("✅ [MenuProvider] Menu updated and filtered successfully.");
     }
-    notifyListeners();
+  }
+
+  /// بناء وتصفية الكروت الشغالة فقط (إلى كانت false كتختفي تماماً)
+  void _generateVisibleItems() {
+    if (_menuConfig == null) return;
+
+    final List<Map<String, dynamic>> allItems = [
+      {'title': 'My Badge', 'icon': Icons.qr_code_scanner, 'section': DrawerSections.myBadge, 'status': _menuConfig!.badge, 'custom': true},
+      {'title': 'Floor Plan', 'icon': Icons.location_on_outlined, 'section': DrawerSections.eFP, 'status': _menuConfig!.floorPlan},
+      {'title': 'My Agenda', 'icon': Icons.calendar_today_outlined, 'section': DrawerSections.myAgenda, 'status': _menuConfig!.program},
+      {'title': 'Exhibitors', 'icon': Icons.store_mall_directory_outlined, 'section': DrawerSections.exhibitors, 'status': _menuConfig!.exhibitors},
+      {'title': 'Networking', 'icon': Icons.people_outline, 'section': DrawerSections.networking, 'status': _menuConfig!.networking},
+      {'title': 'Products', 'icon': Icons.category_outlined, 'section': DrawerSections.products, 'status': _menuConfig!.products},
+      {'title': 'Speakers', 'icon': Icons.person_outline, 'section': DrawerSections.speakers, 'status': _menuConfig!.speakers},
+      {'title': 'Institutional\nPartners', 'icon': Icons.handshake_outlined, 'section': DrawerSections.partners, 'status': _menuConfig!.partners},
+      {'title': 'Sponsors', 'icon': Icons.favorite_outline, 'section': DrawerSections.sponsors, 'status': _menuConfig!.sponsors},
+    ];
+
+    _visibleItems = allItems
+        .where((item) => item['status'] == true) // الفلترة الحقيقية هنا لمنع الكروت الطافية من الظهور
+        .map((item) => MenuItem(
+      title: item['title'] as String,
+      icon: item['icon'] as IconData,
+      section: item['section'] as DrawerSections,
+      isCustomCard: item['custom'] == true,
+    ))
+        .toList();
   }
 }

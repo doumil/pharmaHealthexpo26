@@ -136,7 +136,6 @@ class _HomeScreenState extends State<HomeScreen> {
       MenuItem(title: 'Exhibitors', icon: Icons.store_mall_directory_outlined, section: DrawerSections.exhibitors, isEnabled: menuConfig?.exhibitors ?? true),
       MenuItem(title: 'Networking', icon: Icons.people_outline, section: DrawerSections.networking, isEnabled: menuConfig?.networking ?? true),
       MenuItem(title: 'Products', icon: Icons.category_outlined, section: DrawerSections.products, isEnabled: menuConfig?.products ?? true),
-     // MenuItem(title: 'Conferences', icon: Icons.account_balance, section: DrawerSections.congresses, isEnabled: menuConfig?.congresses ?? true),
       MenuItem(title: 'Speakers', icon: Icons.person_outline, section: DrawerSections.speakers, isEnabled: menuConfig?.speakers ?? true),
       MenuItem(title: 'Partners', icon: Icons.handshake_outlined, section: DrawerSections.partners, isEnabled: menuConfig?.partners ?? true),
       MenuItem(title: 'Sponsors', icon: Icons.favorite_outline, section: DrawerSections.sponsors, isEnabled: menuConfig?.sponsors ?? true),
@@ -386,28 +385,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Container(
-                            padding: EdgeInsets.fromLTRB(width * 0.04, width * 0.04, width * 0.04, width * 0.01),
-                            child: Image.network(
-                              theme.bannerUrl,
+                            padding: EdgeInsets.fromLTRB(width * 0.04, width * 0.0, width * 0.04, width * 0.01),
+                            child: Image(
+                              image: theme.bannerImage,
+                              height: height * 0.24, // 💡 صغرنا الطول هنا (كان كياخد المساحة كاملة، دابا عطيناه 12% من طول الشاشة)
                               fit: BoxFit.contain,
-                              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: LinearProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                        : null,
-                                    color: theme.secondaryColor,
-                                    backgroundColor: theme.whiteColor.withOpacity(0.3),
-                                  ),
-                                );
-                              },
                               errorBuilder: (context, error, stackTrace) {
-                                return Image.asset("", fit: BoxFit.contain);
+                                return const SizedBox();
                               },
                             ),
                           ),
-                          SizedBox(height: height * 0.02),
+                          SizedBox(height: height * 0.01), // 💡 نقصنا حتى الفراغ بين البانر والمنيو باش يجي الـ Design ملموم
                           ...menuWidgets,
                         ],
                       ),

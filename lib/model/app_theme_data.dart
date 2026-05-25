@@ -1,6 +1,4 @@
-// lib/model/app_theme_data.dart
 import 'package:flutter/material.dart';
-import 'package:pharma_health_expo/global/app_config.dart';
 
 class AppThemeData {
   final Color primaryColor;
@@ -9,7 +7,8 @@ class AppThemeData {
   final Color whiteColor;
   final Color redColor;
   final String appTitle;
-  final String bannerUrl; // 💡 New field to hold the banner image URL
+  final String bannerUrl;
+  final String logoWhiteUrl;
 
   AppThemeData({
     required this.primaryColor,
@@ -18,41 +17,52 @@ class AppThemeData {
     required this.whiteColor,
     required this.redColor,
     required this.appTitle,
-    required this.bannerUrl, // 💡 Added to constructor
+    required this.bannerUrl,
+    required this.logoWhiteUrl,
   });
 
-  factory AppThemeData.fromApi(Map<String, dynamic>? json) {
-    if (json == null) {
-      debugPrint("⚠️ API 'data' field is null. Returning default theme.");
-      return defaultTheme();
-    }
+  // --- Getters الذكية للصور ---
 
-    // Helper to safely parse hex color values from the API map structure
+  // كترجع ImageProvider للبانر
+  ImageProvider get bannerImage {
+    if (bannerUrl.contains('http')) {
+      return NetworkImage(bannerUrl);
+    }
+    return AssetImage(bannerUrl);
+  }
+
+  // كترجع ImageProvider للوغو
+  ImageProvider get logoImage {
+    if (logoWhiteUrl.contains('http')) {
+      return NetworkImage(logoWhiteUrl);
+    }
+    return AssetImage(logoWhiteUrl);
+  }
+
+  // --- Factory و الـ Logic ديال التحويل ---
+
+  factory AppThemeData.fromApi(Map<String, dynamic>? json) {
+    if (json == null) return defaultTheme();
+
     Color _parseColorValue(Map<String, dynamic>? colorData, {Color defaultColor = Colors.black}) {
       if (colorData != null && colorData['value'] != null) {
-        final String hexString = colorData['value'];
         try {
-          final buffer = StringBuffer();
-          if (hexString.length == 6) {
-            buffer.write('ff');
-          } else if (hexString.length == 8) {
-            return Color(int.parse(hexString, radix: 16));
-          }
-          buffer.write(hexString.replaceFirst('0x', ''));
-          return Color(int.parse(buffer.toString(), radix: 16));
-        } catch (e) {
-          debugPrint("Error parsing hex color value: $e, using default color.");
-          return defaultColor;
-        }
+          String hex = colorData['value'].toString().replaceFirst('#', '');
+          // التأكد من أن اللون بـ format صحيح 0xFF...
+          if (hex.startsWith('0x')) return Color(int.parse(hex));
+          if (hex.length == 6) hex = 'ff$hex';
+          return Color(int.parse(hex, radix: 16));
+        } catch (_) { return defaultColor; }
       }
       return defaultColor;
     }
 
-    // Helper to safely extract string values like titles or URLs
-    String _parseStringValue(Map<String, dynamic>? data, {required String defaultValue}) {
-      if (data != null && data['value'] != null) {
+    String _parseStringValue(dynamic data, {required String defaultValue}) {
+      if (data == null) return defaultValue;
+      if (data is Map && data['value'] != null) {
         return data['value'].toString();
       }
+      if (data is String && data.isNotEmpty) return data;
       return defaultValue;
     }
 
@@ -62,14 +72,12 @@ class AppThemeData {
       blackColor: _parseColorValue(json['black_color'] as Map<String, dynamic>?),
       whiteColor: _parseColorValue(json['white_color'] as Map<String, dynamic>?),
       redColor: _parseColorValue(json['reed_color'] as Map<String, dynamic>?),
-      appTitle: _parseStringValue(json['app_title'] as Map<String, dynamic>?, defaultValue: "EMEC EXPO"),
-      // 💡 Parsing the banner URL from API. Replace 'banner_url' with the actual key from your JSON.
-      bannerUrl: _parseStringValue(json['banner_url'] as Map<String, dynamic>?,
-          defaultValue: '${AppConfig.baseUrl}/uploads/800x400-EMECEXPO-2025.jpg'),
+      appTitle: _parseStringValue(json['app_title'], defaultValue: "PHARMA HEALTH EXPO"),
+      bannerUrl: _parseStringValue(json['banner_url'], defaultValue: 'assets/PHARMA-HEALTH-EXPO-LOGO-WHITE.png'),
+      logoWhiteUrl: _parseStringValue(json['logo_white_url'], defaultValue: 'assets/PHARMA-HEALTH-EXPO-LOGO-WHITE.png'),
     );
   }
 
-  // Fallback values used if the API is unreachable
   static AppThemeData defaultTheme() {
     return AppThemeData(
       primaryColor: const Color(0xff50134f),
@@ -77,8 +85,9 @@ class AppThemeData {
       blackColor: Colors.black,
       whiteColor: Colors.white,
       redColor: Colors.red,
-      appTitle: "EMEC EXPO",
-      bannerUrl: '${AppConfig.baseUrl}/uploads/800x400-EMECEXPO-2025.jpg',
+      appTitle: "PHARMA HEALTH EXPO",
+      bannerUrl: 'assets/PHARMA-HEALTH-EXPO-LOGO-WHITE.png',
+      logoWhiteUrl: 'assets/PHARMA-HEALTH-EXPO-LOGO-WHITE.png',
     );
   }
 }

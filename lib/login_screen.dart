@@ -1,20 +1,16 @@
-// lib/login_screen.dart
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:pharma_health_expo/providers/theme_provider.dart';
 import 'package:pharma_health_expo/model/user_model.dart';
-import 'package:pharma_health_expo/main.dart'; // Assuming WelcomPage is defined here
-import 'package:url_launcher/url_launcher.dart';
-import 'api_services/auth_api_service.dart'; // Contains sendVerificationCode, verifyCode, and NEW: forgetPassword
-import 'model/app_theme_data.dart'; // Assuming this defines your theme structure
+import 'package:pharma_health_expo/main.dart';
+import 'package:pharma_health_expo/api_services/auth_api_service.dart';
+import 'package:pharma_health_expo/model/app_theme_data.dart';
 
-// --- Step Enum for State Management ---
 enum LoginStep { enterEmail, verifyCode, forgetPassword }
 
-// --- Main Widget for Step Management ---
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -23,55 +19,42 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Shared state for the login flow
   final TextEditingController _emailController = TextEditingController();
-  String? _validatedEmail; // Stores email after successful code send/forget password
+  String? _validatedEmail;
   LoginStep _currentStep = LoginStep.enterEmail;
 
   void _goToStep2(String email) {
     setState(() {
       _validatedEmail = email;
       _currentStep = LoginStep.verifyCode;
-      // Ensure the shared controller has the email when entering Step 2
-      if (_emailController.text != email) {
-        _emailController.text = email;
-      }
+      if (_emailController.text != email) _emailController.text = email;
     });
   }
 
   void _goToStep3() {
     setState(() {
       _currentStep = LoginStep.forgetPassword;
-      // **[MODIFIED]** Only clear the email field if it was empty,
-      // otherwise keep the email already entered in Step 1/Step 2
       if (_validatedEmail != null && _emailController.text.isEmpty) {
         _emailController.text = _validatedEmail!;
       }
     });
   }
 
-  // Refactored to handle returning to step 1 from any other step
   void _goToStep1() {
     setState(() {
-      // Keep the email in the controller if it's already validated
-      if (_validatedEmail != null) {
-        _emailController.text = _validatedEmail!;
-      } else {
-        _emailController.clear();
-      }
+      if (_validatedEmail != null) _emailController.text = _validatedEmail!;
+      else _emailController.clear();
       _validatedEmail = null;
       _currentStep = LoginStep.enterEmail;
     });
   }
 
-  // Used by Step 3 (Forget Password) to transition to Step 2 (Verify)
   void _goToStep2FromForget(String email) {
     setState(() {
       _validatedEmail = email;
       _currentStep = LoginStep.verifyCode;
     });
   }
-
 
   @override
   void dispose() {
@@ -81,37 +64,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context).currentTheme;
 
     Widget currentStepWidget;
     switch (_currentStep) {
       case LoginStep.enterEmail:
-        currentStepWidget = LoginStep1(
-          key: const ValueKey('step1'),
-          emailController: _emailController,
-          onSuccess: _goToStep2,
-        );
+        currentStepWidget = LoginStep1(key: const ValueKey('step1'), emailController: _emailController, onSuccess: _goToStep2);
         break;
       case LoginStep.verifyCode:
-      // Ensure email is present before building Step 2
-        if (_validatedEmail == null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) => _goToStep1());
-          currentStepWidget = const Center(child: CircularProgressIndicator());
-        } else {
-          currentStepWidget = LoginStep2(
-            key: const ValueKey('step2'),
-            email: _validatedEmail!,
-            onBack: _goToStep1, // Back button goes to step 1
-            onResendCode: _goToStep3, // Resend button now directs to the Forget Password flow
-          );
-        }
+        currentStepWidget = _validatedEmail == null
+            ? const Center(child: CircularProgressIndicator())
+            : LoginStep2(key: const ValueKey('step2'), email: _validatedEmail!, onBack: _goToStep1, onResendCode: _goToStep3);
         break;
       case LoginStep.forgetPassword:
-        currentStepWidget = LoginStep3(
-          key: const ValueKey('step3'),
-          emailController: _emailController, // Use main controller for input
-          onSuccess: _goToStep2FromForget, // Success goes to verify code (Step 2)
-          onBack: _goToStep1, // Back button goes to step 1
-        );
+        currentStepWidget = LoginStep3(key: const ValueKey('step3'), emailController: _emailController, onSuccess: _goToStep2FromForget, onBack: _goToStep1);
         break;
     }
 
@@ -124,42 +90,18 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // Logo/Header Area
-              Image.asset(
-                'assets/EMEC-LOGO.png',
-                height: 120,
-              ),
+              // استخدام الـ Getter الذكي للوغو
+              Image(image: theme.logoImage, height: 120),
               const SizedBox(height: 48.0),
-
-              // Step Widget
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: currentStepWidget,
               ),
               const SizedBox(height: 24.0),
-
-              // Footer Links
-              // 1. Forgot Password Link (Goes to Step 3)
-              // The user requested to hide this link by commenting it out.
-              /*
-              TextButton(
-                onPressed: _goToStep3,
-                child: Text(
-                  'Forgot Password?',
-                  style: TextStyle(color: Provider.of<ThemeProvider>(context).currentTheme.secondaryColor),
-                ),
-              ),
-              */
-
-              // 2. Register Link
               TextButton(
                 onPressed: () => _launchUrlRegister(),
-                child: Text(
-                  'Don\'t have an account? Register',
-                  style: TextStyle(color: Provider.of<ThemeProvider>(context).currentTheme.secondaryColor),
-                ),
+                child: Text('Don\'t have an account? Register', style: TextStyle(color: theme.secondaryColor)),
               ),
-
             ],
           ),
         ),
@@ -167,40 +109,23 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // --- Design Implementation (Full-Screen Background) ---
   Widget _buildLoginBackground(BuildContext context, Widget child) {
     final theme = Provider.of<ThemeProvider>(context).currentTheme;
     return Scaffold(
       backgroundColor: theme.primaryColor,
       body: Stack(
         children: [
-          // Background Image
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/background_login.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          // Gradient Overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    theme.blackColor.withOpacity(0.4),
-                    theme.blackColor.withOpacity(0.8),
-                  ],
+                  colors: [theme.blackColor.withOpacity(0.4), theme.blackColor.withOpacity(0.8)],
                 ),
               ),
             ),
           ),
-          // Content
           child,
         ],
       ),
@@ -209,16 +134,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _launchUrlRegister() async {
     final Uri url = Uri.parse('https://www.emecexpo.com/tickets/');
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch ticket.')),
-        );
-      }
-      throw Exception('Could not launch url');
-    }
+    await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 }
+
+// =======================================================
+// هنا يمكنك وضع كلاسات LoginStep1, LoginStep2, LoginStep3
+// (التي شاركتني بها سابقاً) كما هي بدون تغييرات إضافية.
+// =======================================================
 
 // =======================================================
 // --- STEP 1: Enter Email Only (Login) ---

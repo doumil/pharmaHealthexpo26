@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:pharma_health_expo/program_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:pharma_health_expo/providers/app_config_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -18,7 +19,6 @@ import 'package:pharma_health_expo/model/user_model.dart';
 import 'package:pharma_health_expo/login_screen.dart';
 import 'package:pharma_health_expo/home_screen.dart';
 import 'package:pharma_health_expo/Busniess%20Safe.dart';
-//import 'package:pharma_health_expo/Congress.dart';
 import 'package:pharma_health_expo/Contact.dart';
 import 'package:pharma_health_expo/Exhibitors.dart';
 import 'package:pharma_health_expo/Food.dart';
@@ -116,36 +116,27 @@ void main() async {
   globalLitems = [];
   notificationCountNotifier.value = globalLitems.length;
 
-  final themeProvider = ThemeProvider();
-  final menuProvider = MenuProvider();
-
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: themeProvider),
-        ChangeNotifierProvider.value(value: menuProvider),
+        // 🛠️ هنا تم إصلاح المشكل عبر إدراج الـ AppConfigProvider في الجذر مع باقي الـ Providers
+        ChangeNotifierProvider(create: (_) => AppConfigProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => MenuProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => ConnectivityService()),
       ],
-      child: MyApp(
-          initialScreen: initialScreen,
-          themeProvider: themeProvider,
-          menuProvider: menuProvider
-      ),
+      child: MyApp(initialScreen: initialScreen),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
   final Widget initialScreen;
-  final ThemeProvider themeProvider;
-  final MenuProvider menuProvider;
 
   const MyApp({
     Key? key,
     required this.initialScreen,
-    required this.themeProvider,
-    required this.menuProvider,
   }) : super(key: key);
 
   @override
@@ -158,7 +149,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    // 💡 ننتظر حتى تبنى الـ Widgets بنجاح قبل طلب الـ Context والـ API
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
   }
 
   /// Sequentially executes core layout configurations to guarantee runtime context integrity
@@ -166,20 +160,29 @@ class _MyAppState extends State<MyApp> {
     debugPrint("🔄 [Main Init] Initiating application configuration prefetch sequence...");
 
     try {
-      // 1. Force dynamic theme fetch from live server rules first (Handles internal fallback to cache/default)
-      await widget.themeProvider.fetchThemeFromApi();
+      // 1. استخدام الـ Provider الموحد لجلب الإعدادات بأمان الآن بعد أن أصبح متوفراً في الـ Context
+      final configProvider = Provider.of<AppConfigProvider>(context, listen: false);
+      await configProvider.initializeConfig();
+
+      // 2. توزيع الداتا على الـ Providers الآخرين بدون طلبات API إضافية
+      if (configProvider.rawSettings != null) {
+        if (mounted) {
+          // تحديث الـ Theme
+          Provider.of<ThemeProvider>(context, listen: false).updateThemeFromConfig(configProvider);
+
+          // تحديث الـ Menu
+          Provider.of<MenuProvider>(context, listen: false).updateMenuFromConfig(configProvider);
+
+          // تحديث الـ Home
+          Provider.of<HomeProvider>(context, listen: false).updateCardsFromConfig(configProvider);
+        }
+        debugPrint("✅ [Main Init] Providers synced successfully using centralized config.");
+      }
     } catch (e) {
-      debugPrint("⚠️ [Main Init] Theme synchronization sequence bypassed or faulted: $e");
+      debugPrint("⚠️ [Main Init] Initialization sequence faulted: $e");
     }
 
-    try {
-      // 2. Pull the runtime drawer menu configurations from API
-      await widget.menuProvider.fetchMenuConfig();
-    } catch (e) {
-      debugPrint("⚠️ [Main Init] Menu visibility synchronization faulted: $e");
-    }
-
-    // 3. Complete step sequences and safely drop the visual loader layer
+    // 3. إنهاء التحميل وإظهار الواجهة فورا لفك الـ Loading الشاشة البيضاء/الرمادية
     if (mounted) {
       setState(() {
         _isInitializing = false;
@@ -190,6 +193,21 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // إذا كان التطبيق في مرحلة الـ Initialization، نظهر واجهة تحميل ناصعة ومحترفة
+    if (_isInitializing) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: SpinKitCircle(
+              color: Color(0xFF692062), // اللون الافتراضي للبروجي Pharma
+              size: 50.0,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         final currentTheme = themeProvider.currentTheme;
@@ -354,7 +372,6 @@ class _WelcomPageState extends State<WelcomPage> {
     else if (currentPage == DrawerSections.program) container = const ProgramScreen();
     else if (currentPage == DrawerSections.networking) container = NetworkinScreen(authToken: currentUser.token ?? "");
     else if (currentPage == DrawerSections.myAgenda) container = AgendaScreen();
-    //else if (currentPage == DrawerSections.congress) container = CongressScreen();
     else if (currentPage == DrawerSections.speakers) container = SpeakersScreen();
     else if (currentPage == DrawerSections.officialEvents) container = OfficialEventsScreen();
     else if (currentPage == DrawerSections.partners) container = PartnersScreen();
@@ -362,7 +379,7 @@ class _WelcomPageState extends State<WelcomPage> {
     else if (currentPage == DrawerSections.eFP) container = ExpoFloorPlan();
     else if (currentPage == DrawerSections.supportingP) container = SupportingPScreen();
     else if (currentPage == DrawerSections.mediaP) container = MediaPScreen();
-    else if (currentPage == DrawerSections.socialM) container = SocialMScreen();
+    //else if (currentPage == DrawerSections.socialM) container = SocialMScreen();
     else if (currentPage == DrawerSections.contact) container = ContactScreen();
     else if (currentPage == DrawerSections.information) container = InformationScreen();
     else if (currentPage == DrawerSections.schedule) container = SchelduleScreen();
@@ -376,7 +393,6 @@ class _WelcomPageState extends State<WelcomPage> {
     else if (currentPage == DrawerSections.favourites) container = const FavouritesScreen();
     else if (currentPage == DrawerSections.scannedBadges) container = ScannedBadgesScreen(user: currentUser);
     else if (currentPage == DrawerSections.meetingRatings) container = const MeetingRatingsScreen();
-    //else if (currentPage == DrawerSections.congresses) container = CongressScreen();
     else if (currentPage == DrawerSections.sponsors) container = SupportingPScreen();
     else container = Center(child: const DullPage(title: 'Page Not Found'));
 
@@ -460,12 +476,10 @@ class _WelcomPageState extends State<WelcomPage> {
     required Function(BuildContext context, AppThemeData theme) showLogoutDialog,
     required AppThemeData appTheme,
   }) {
-    // Standard safety fallbacks applied if menu configuration object payload hasn't completed loading yet
     final floorPlanActive = menuConfig?.floorPlan ?? true;
     final programActive = menuConfig?.program ?? true;
     final exhibitorsActive = menuConfig?.exhibitors ?? true;
     final speakersActive = menuConfig?.speakers ?? true;
-    //final congressesActive = menuConfig?.congresses ?? true;
     final sponsorsActive = menuConfig?.sponsors ?? true;
     final partnersActive = menuConfig?.partners ?? true;
     final badgeActive = menuConfig?.badge ?? true;
@@ -496,7 +510,6 @@ class _WelcomPageState extends State<WelcomPage> {
           menuItem(DrawerSections.program, "Program", Icons.calendar_today_outlined, currentSection == DrawerSections.program, onNavigate, programActive),
           menuItem(DrawerSections.exhibitors, "Exhibitors", Icons.store_mall_directory_outlined, currentSection == DrawerSections.exhibitors, onNavigate, exhibitorsActive),
           menuItem(DrawerSections.speakers, "Speakers", Icons.speaker_notes_outlined, currentSection == DrawerSections.speakers, onNavigate, speakersActive),
-          //menuItem(DrawerSections.congresses, "Congresses", Icons.account_balance, currentSection == DrawerSections.congresses, onNavigate, congressesActive),
           menuItem(DrawerSections.sponsors, "Sponsors", Icons.favorite_outline, currentSection == DrawerSections.sponsors, onNavigate, sponsorsActive),
           menuItem(DrawerSections.partners, "Partners", Icons.handshake_outlined, currentSection == DrawerSections.partners, onNavigate, partnersActive),
 
@@ -522,7 +535,7 @@ class _WelcomPageState extends State<WelcomPage> {
           const Divider(color: Colors.white24, height: 20),
 
           menuItem(DrawerSections.contact, "Contact", Icons.contact_mail_outlined, currentSection == DrawerSections.contact, onNavigate, true),
-          menuItem(DrawerSections.socialM, "Social Media", FontAwesomeIcons.shareNodes, currentSection == DrawerSections.socialM, onNavigate, true),
+          //menuItem(DrawerSections.socialM, "Social Media", FontAwesomeIcons.shareNodes, currentSection == DrawerSections.socialM, onNavigate, true),
 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
