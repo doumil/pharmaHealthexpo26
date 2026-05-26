@@ -1,14 +1,25 @@
-# platform :ios, '14.0'
-platform :ios, '14.0'
-
+# السطور الأولى ضرورية باش CocoaPods يقدر يقرأ ميثودات Flutter
 plugin_pods = [
   'google_maps_flutter_ios'
 ]
+
+# 1. جلب إعدادات وميثودات الـ Helper ديال Flutter
+flutter_root = File.expand_path(File.join('..', '..', '..', 'flutter'), __FILE__)
+if File.exist?(File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'))
+  require File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
+else
+  # كفيلسوف احتياطي ف السيرفرات ديال CI/CD بحال Codemagic
+  require File.expand_path(File.join('..', '.symlinks', 'plugins', 'flutter_plugin_loader', 'ios', 'podhelper.rb'), __FILE__) rescue nil
+end
+
+# تحديد نسخة الـ iOS الأدنى
+platform :ios, '14.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
+  # 2. هاد الميثود دابا غيولي متعرف عليها حيت عيطنا لـ podhelper.rb الفوق
   flutter_install_all_ios_pods File.dirname(File.expand_path(__FILE__))
 end
 
@@ -16,7 +27,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
-      # اجبار جميع الـ Pods والـ Plugins يخدموا بـ iOS 14.0 لتفادي أي نزاع ف الـ Versions
+      # إجبار جميع الـ Plugins والـ Pods على استهدف iOS 14.0 لتفادي أي نزاع
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
     end
   end
