@@ -42,7 +42,7 @@ dependencies:
   rxdart: any
   get: any
   file_picker: any
-  app_settings: ^6.1.1
+  app_settings: any
   url_launcher: any
   sqflite: any
   google_maps_flutter: any
