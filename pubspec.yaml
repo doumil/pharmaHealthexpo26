@@ -16,7 +16,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: any
   intl: any
-  font_awesome_flutter: any
+  font_awesome_flutter: ^10.8.0
   carousel_slider: any
   flutter_staggered_grid_view: any
   webview_flutter: any
