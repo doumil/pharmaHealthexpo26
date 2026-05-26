@@ -527,7 +527,7 @@ class _WelcomPageState extends State<WelcomPage> {
             ),
           ),
           menuItem(DrawerSections.myProfile, "My Profile", Icons.person_outline, currentSection == DrawerSections.myProfile, onNavigate, true),
-          menuItem(DrawerSections.myBadge, "My Badge", FontAwesomeIcons.idBadge, currentSection == DrawerSections.myBadge, onNavigate, badgeActive),
+          menuItem(DrawerSections.myBadge, "My Badge", FontAwesomeIcons.idBadge as IconData, currentSection == DrawerSections.myBadge, onNavigate, badgeActive),
           menuItem(DrawerSections.scannedBadges, "Scanned Badges", Icons.qr_code_scanner, currentSection == DrawerSections.scannedBadges, onNavigate, true),
           menuItem(DrawerSections.myAgenda, "My Agenda", Icons.calendar_today_outlined, currentSection == DrawerSections.myAgenda, onNavigate, programActive),
           menuItem(DrawerSections.networking, "Networking", Icons.people_outline, currentSection == DrawerSections.networking, onNavigate, networkingActive),
