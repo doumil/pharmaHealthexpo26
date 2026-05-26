@@ -1,25 +1,29 @@
-# السطور الأولى ضرورية باش CocoaPods يقدر يقرأ ميثودات Flutter
-plugin_pods = [
-  'google_maps_flutter_ios'
-]
+# إعدادات جلب مسار Flutter ديناميكياً من الملفات التي يولدها التطبيق
+# (هذا هو الأسلوب الرسمي لـ Flutter لمنع مشاكل الـ CI/CD)
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "Generated.xcconfig not found. Please run `flutter pub get` or build the project first."
+  end
 
-# 1. جلب إعدادات وميثودات الـ Helper ديال Flutter
-flutter_root = File.expand_path(File.join('..', '..', '..', 'flutter'), __FILE__)
-if File.exist?(File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'))
-  require File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
-else
-  # كفيلسوف احتياطي ف السيرفرات ديال CI/CD بحال Codemagic
-  require File.expand_path(File.join('..', '.symlinks', 'plugins', 'flutter_plugin_loader', 'ios', 'podhelper.rb'), __FILE__) rescue nil
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in Generated.xcconfig."
 end
 
-# تحديد نسخة الـ iOS الأدنى
+# تحميل الـ podhelper.rb باستعمال المسار الديناميكي الحقيقي
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper.rb'), flutter_root)
+
+# تحديد إصدار نظام iOS الأدنى المتوافق مع خرائط جوجل
 platform :ios, '14.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # 2. هاد الميثود دابا غيولي متعرف عليها حيت عيطنا لـ podhelper.rb الفوق
+  # تثبيت كافة الـ Plugins الخاصة بـ Flutter
   flutter_install_all_ios_pods File.dirname(File.expand_path(__FILE__))
 end
 
@@ -27,7 +31,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
-      # إجبار جميع الـ Plugins والـ Pods على استهدف iOS 14.0 لتفادي أي نزاع
+      # إجبار جميع الـ Pods والـ Plugins المستدعاة على استهداف iOS 14.0 لتفادي أي نزاع في الإصدارات
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
     end
   end
