@@ -60,7 +60,8 @@ flutter_native_splash:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/pharmaIcon.png"
+  image_path: "assets/pharmaIcon.jpg"
+  remove_alpha_ios: true
   min_sdk_android: 21
 
 dev_dependencies:
