@@ -49,5 +49,14 @@
       <false/>
       <key>ITSAppUsesNonExemptEncryption</key>
       <false/>
+
+      <key>NSCameraUsageDescription</key>
+      <string>Nous avons besoin d'accéder à votre caméra pour scanner les badges et les codes QR de l'exposition.</string>
+      <key>NSPhotoLibraryUsageDescription</key>
+      <string>Nous avons besoin d'accéder à votre galerie pour vous permettre de choisir et de sauvegarder des images de l'événement.</string>
+      <key>NSCalendarsUsageDescription</key>
+      <string>Nous avons besoin d'accéder à votre calendrier pour ajouter les dates et les sessions de l'exposition.</string>
+      <key>NSLocationWhenInUseUsageDescription</key>
+      <string>Nous avons besoin de votre position pour vous guider vers le lieu de l'exposition sur la carte.</string>
    </dict>
 </plist>
