@@ -1,7 +1,7 @@
 name: pharma_health_expo
 description: "Pharma Health Expo 2026 Flutter Project."
 publish_to: 'none'
-version: 1.0.0+24
+version: 1.0.0+25
 
 environment:
   sdk: ^3.9.0
