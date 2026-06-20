@@ -51,7 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _initializeUserAndToken();
   }
 
-  /// Reconstitutes verified session context properties or initializes guest profile structures
   Future<void> _initializeUserAndToken() async {
     prefs = await SharedPreferences.getInstance();
     User? userFromWidget = widget.user;
@@ -81,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  /// Flushes authentication keys and shifts navigational context to login view stack
   Future<void> _logoutConfirmed() async {
     prefs = await SharedPreferences.getInstance();
     await prefs.remove('authToken');
@@ -94,7 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Displays modal prompt tracking user intent before executing structural logout sequences
   Future<void> _showLogoutConfirmationDialog(BuildContext context, AppThemeData theme) async {
     return showDialog<void>(
       context: context,
@@ -127,22 +124,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Compiles system feature mapping list injected with live visibility state constraints
+  // 🟩 الترتيب السحري الجديد باش تجي My Agenda صغيورة ف الجنب د الـ Badge
   List<MenuItem> _getAllMenuItems(MenuConfig? menuConfig) {
     return [
-      MenuItem(title: 'My Badge', icon: Icons.qr_code_scanner, section: DrawerSections.myBadge, isCustomCard: true, isEnabled: menuConfig?.badge ?? true),
-      MenuItem(title: 'Floor Plan', icon: Icons.location_on_outlined, section: DrawerSections.eFP, isEnabled: menuConfig?.floorPlan ?? true),
-      MenuItem(title: 'My Agenda', icon: Icons.calendar_today_outlined, section: DrawerSections.myAgenda, isEnabled: menuConfig?.program ?? true),
+      MenuItem(title: 'My Badge', icon: Icons.qr_code_scanner, section: DrawerSections.myBadge, isCustomCard: true, isEnabled: menuConfig?.badge ?? true), // Index 0 -> الكبيرة
+      MenuItem(title: 'Floor Plan', icon: Icons.location_on_outlined, section: DrawerSections.eFP, isEnabled: menuConfig?.floorPlan ?? true), // Index 1 -> الصغيرة الأولى فوق ف الجنب
+      MenuItem(title: 'My Agenda', icon: Icons.calendar_today_outlined, section: DrawerSections.myAgenda, isEnabled: menuConfig?.badge ?? true), // Index 2 -> الصغيرة الثانية تحتها ف الجنب 🎯
+      MenuItem(title: 'Program', icon: Icons.event_note, section: DrawerSections.program, isEnabled: menuConfig?.program ?? true), // باقي الكروت كيجيو ف الـ Grid العادي متناسقين جوج بجوج
       MenuItem(title: 'Exhibitors', icon: Icons.store_mall_directory_outlined, section: DrawerSections.exhibitors, isEnabled: menuConfig?.exhibitors ?? true),
       MenuItem(title: 'Networking', icon: Icons.people_outline, section: DrawerSections.networking, isEnabled: menuConfig?.networking ?? true),
-      MenuItem(title: 'Products', icon: Icons.category_outlined, section: DrawerSections.products, isEnabled: menuConfig?.products ?? true),
       MenuItem(title: 'Speakers', icon: Icons.person_outline, section: DrawerSections.speakers, isEnabled: menuConfig?.speakers ?? true),
       MenuItem(title: 'Partners', icon: Icons.handshake_outlined, section: DrawerSections.partners, isEnabled: menuConfig?.partners ?? true),
       MenuItem(title: 'Sponsors', icon: Icons.favorite_outline, section: DrawerSections.sponsors, isEnabled: menuConfig?.sponsors ?? true),
     ];
   }
 
-  /// Grid cell layout factory rendering structural button layers assigned with theme tokens
   Widget _buildFlexibleMenuCard({
     required BuildContext context,
     required MenuItem item,
@@ -388,14 +384,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: EdgeInsets.fromLTRB(width * 0.04, width * 0.0, width * 0.04, width * 0.01),
                             child: Image(
                               image: theme.bannerImage,
-                              height: height * 0.24, // 💡 صغرنا الطول هنا (كان كياخد المساحة كاملة، دابا عطيناه 12% من طول الشاشة)
+                              height: height * 0.24,
                               fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) {
                                 return const SizedBox();
                               },
                             ),
                           ),
-                          SizedBox(height: height * 0.01), // 💡 نقصنا حتى الفراغ بين البانر والمنيو باش يجي الـ Design ملموم
+                          SizedBox(height: height * 0.01),
                           ...menuWidgets,
                         ],
                       ),

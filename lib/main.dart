@@ -119,7 +119,6 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // 🛠️ هنا تم إصلاح المشكل عبر إدراج الـ AppConfigProvider في الجذر مع باقي الـ Providers
         ChangeNotifierProvider(create: (_) => AppConfigProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => MenuProvider()),
@@ -149,7 +148,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // 💡 ننتظر حتى تبنى الـ Widgets بنجاح قبل طلب الـ Context والـ API
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
@@ -160,20 +158,13 @@ class _MyAppState extends State<MyApp> {
     debugPrint("🔄 [Main Init] Initiating application configuration prefetch sequence...");
 
     try {
-      // 1. استخدام الـ Provider الموحد لجلب الإعدادات بأمان الآن بعد أن أصبح متوفراً في الـ Context
       final configProvider = Provider.of<AppConfigProvider>(context, listen: false);
       await configProvider.initializeConfig();
 
-      // 2. توزيع الداتا على الـ Providers الآخرين بدون طلبات API إضافية
       if (configProvider.rawSettings != null) {
         if (mounted) {
-          // تحديث الـ Theme
           Provider.of<ThemeProvider>(context, listen: false).updateThemeFromConfig(configProvider);
-
-          // تحديث الـ Menu
           Provider.of<MenuProvider>(context, listen: false).updateMenuFromConfig(configProvider);
-
-          // تحديث الـ Home
           Provider.of<HomeProvider>(context, listen: false).updateCardsFromConfig(configProvider);
         }
         debugPrint("✅ [Main Init] Providers synced successfully using centralized config.");
@@ -182,7 +173,6 @@ class _MyAppState extends State<MyApp> {
       debugPrint("⚠️ [Main Init] Initialization sequence faulted: $e");
     }
 
-    // 3. إنهاء التحميل وإظهار الواجهة فورا لفك الـ Loading الشاشة البيضاء/الرمادية
     if (mounted) {
       setState(() {
         _isInitializing = false;
@@ -193,14 +183,14 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // إذا كان التطبيق في مرحلة الـ Initialization، نظهر واجهة تحميل ناصعة ومحترفة
+    // إذا كان التطبيق في مرحلة الـ Initialization، نظهر واجهة تحميل زرقاء ملكية متناسقة
     if (_isInitializing) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(
             child: SpinKitCircle(
-              color: Color(0xFF692062), // اللون الافتراضي للبروجي Pharma
+              color: Color(0xFF004B9F), // 🟦 تم تغيير اللون الموف إلى الأزرق الملكي د الـ Pharma هنا
               size: 50.0,
             ),
           ),
@@ -379,7 +369,6 @@ class _WelcomPageState extends State<WelcomPage> {
     else if (currentPage == DrawerSections.eFP) container = ExpoFloorPlan();
     else if (currentPage == DrawerSections.supportingP) container = SupportingPScreen();
     else if (currentPage == DrawerSections.mediaP) container = MediaPScreen();
-    //else if (currentPage == DrawerSections.socialM) container = SocialMScreen();
     else if (currentPage == DrawerSections.contact) container = ContactScreen();
     else if (currentPage == DrawerSections.information) container = InformationScreen();
     else if (currentPage == DrawerSections.schedule) container = SchelduleScreen();
@@ -527,14 +516,14 @@ class _WelcomPageState extends State<WelcomPage> {
             ),
           ),
           menuItem(DrawerSections.myProfile, "My Profile", Icons.person_outline, currentSection == DrawerSections.myProfile, onNavigate, true),
-          menuItem(DrawerSections.myBadge, "My Badge", Icons.badge_outlined, currentSection == DrawerSections.myBadge, onNavigate, badgeActive),          menuItem(DrawerSections.scannedBadges, "Scanned Badges", Icons.qr_code_scanner, currentSection == DrawerSections.scannedBadges, onNavigate, true),
+          menuItem(DrawerSections.myBadge, "My Badge", Icons.badge_outlined, currentSection == DrawerSections.myBadge, onNavigate, badgeActive),
+          menuItem(DrawerSections.scannedBadges, "Scanned Badges", Icons.qr_code_scanner, currentSection == DrawerSections.scannedBadges, onNavigate, true),
           menuItem(DrawerSections.myAgenda, "My Agenda", Icons.calendar_today_outlined, currentSection == DrawerSections.myAgenda, onNavigate, programActive),
           menuItem(DrawerSections.networking, "Networking", Icons.people_outline, currentSection == DrawerSections.networking, onNavigate, networkingActive),
 
           const Divider(color: Colors.white24, height: 20),
 
           menuItem(DrawerSections.contact, "Contact", Icons.contact_mail_outlined, currentSection == DrawerSections.contact, onNavigate, true),
-          //menuItem(DrawerSections.socialM, "Social Media", FontAwesomeIcons.shareNodes, currentSection == DrawerSections.socialM, onNavigate, true),
 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

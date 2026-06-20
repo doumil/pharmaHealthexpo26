@@ -15,33 +15,29 @@ class AppConfigProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  /// الميثود الأساسية لبدء التحميل
   Future<void> initializeConfig() async {
     _isLoading = true;
     notifyListeners();
 
-    // 1. محاولة تحميل البيانات من الكاش بناءً على الـ eventId
     final prefs = await SharedPreferences.getInstance();
     String? cachedData = prefs.getString('app_settings_cache_${AppConfig.eventId}');
 
     if (cachedData != null) {
       try {
         final Map<String, dynamic> decoded = json.decode(cachedData);
-        _rawSettings = decoded['data'];
+        _rawSettings = decoded['data']; // كنخليو الـ rawSettings ديما شغال وخا يتفرقع الموديل
         _config = AppConfigModel.fromJson(decoded);
       } catch (e) {
-        debugPrint("Error loading from cache: $e");
+        debugPrint("⚠️ Error parsing Model from cache (ignoring): $e");
       }
     }
 
-    // 2. جلب أحدث البيانات من السيرفر
     await fetchFromApi();
 
     _isLoading = false;
     notifyListeners();
   }
 
-  /// جلب البيانات من الـ API المذكورة في AppConfig
   Future<void> fetchFromApi() async {
     try {
       debugPrint("Fetching config from: ${AppConfig.appSettingsUrl}");
@@ -51,25 +47,25 @@ class AppConfigProvider with ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          // إذا كان السيرفر كيحتاج apiKey، فك التعليق تحت:
-          // 'X-API-KEY': AppConfig.apiKey,
         },
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
 
-        // حفظ البيانات الخام
-        _rawSettings = jsonData['data'];
+        _rawSettings = jsonData['data']; // كنحفظو الداتا الخام فوراً باش نخدمو بيها ف الـ Providers ديريكت
 
-        // حفظ في الكاش الخاص بهذا الـ eventId
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('app_settings_cache_${AppConfig.eventId}', json.encode(jsonData));
 
-        // تحديث الـ Config
-        _config = AppConfigModel.fromJson(jsonData);
+        try {
+          _config = AppConfigModel.fromJson(jsonData);
+        } catch (modelError) {
+          // إيلا تفرقع الـ Model بسبب الـ DataType د السيرفر، الـ App غايكمل عادي بالـ rawSettings
+          debugPrint("⚠️ [AppConfigModel] Crashed due to server types but bypassed: $modelError");
+        }
 
-        debugPrint("✅ Configuration fetched and updated successfully.");
+        debugPrint("✅ Configuration synced.");
         notifyListeners();
       } else {
         debugPrint("Failed to fetch config: ${response.statusCode}");

@@ -269,16 +269,16 @@ class _DetailSpeakersScreenState extends State<DetailSpeakersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Biography",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryContentColor),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      speakerBio,
-                      style: TextStyle(fontSize: 16, color: primaryContentColor.withOpacity(0.7), height: 1.5),
-                      textAlign: TextAlign.justify,
-                    ),
+                    // Text(
+                    //   "Biography",
+                    //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryContentColor),
+                    // ),
+                    // const SizedBox(height: 10),
+                    // Text(
+                    //   speakerBio,
+                    //   style: TextStyle(fontSize: 16, color: primaryContentColor.withOpacity(0.7), height: 1.5),
+                    //   textAlign: TextAlign.justify,
+                    // ),
                   ],
                 ),
               ),

@@ -54,6 +54,7 @@ dependencies:
   animated_splash_screen: any
 
 flutter_native_splash:
+  color: "#004B9F"
   image: "assets/PHARMA-HEALTH-EXPO-LOGO.png"
   android_gravity: center
 
