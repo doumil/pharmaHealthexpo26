@@ -8,6 +8,7 @@ import 'package:pharma_health_expo/model/user_model.dart';
 import 'package:pharma_health_expo/main.dart';
 import 'package:pharma_health_expo/api_services/auth_api_service.dart';
 import 'package:pharma_health_expo/model/app_theme_data.dart';
+import 'global/app_config.dart';
 
 enum LoginStep { enterEmail, verifyCode, forgetPassword }
 
@@ -62,15 +63,27 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _launchUrlRegister() async {
+    final Uri url = Uri.parse(AppConfig.registerUrl);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      debugPrint("Could not launch $url");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Provider.of<ThemeProvider>(context).currentTheme;
-
     Widget currentStepWidget;
     switch (_currentStep) {
       case LoginStep.enterEmail:
-        currentStepWidget = LoginStep1(key: const ValueKey('step1'), emailController: _emailController, onSuccess: _goToStep2);
-        break;
+        currentStepWidget = LoginStep1(
+          key: const ValueKey('step1'),
+          emailController: _emailController,
+          onSuccess: _goToStep2,
+          onRegister: _launchUrlRegister,
+        );
       case LoginStep.verifyCode:
         currentStepWidget = _validatedEmail == null
             ? const Center(child: CircularProgressIndicator())
@@ -81,40 +94,11 @@ class _LoginScreenState extends State<LoginScreen> {
         break;
     }
 
-    return _buildLoginBackground(
-      context,
-      Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // استخدام الـ Getter الذكي للوغو
-              Image(image: theme.logoImage, height: 120),
-              const SizedBox(height: 48.0),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: currentStepWidget,
-              ),
-              const SizedBox(height: 24.0),
-              TextButton(
-                onPressed: () => _launchUrlRegister(),
-                child: Text('Don\'t have an account? Register', style: TextStyle(color: theme.secondaryColor)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoginBackground(BuildContext context, Widget child) {
-    final theme = Provider.of<ThemeProvider>(context).currentTheme;
     return Scaffold(
       backgroundColor: theme.primaryColor,
       body: Stack(
         children: [
+          // Background Layer
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -126,15 +110,52 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          child,
+
+          // Content Layer with SafeArea and Column to fix Version alignment
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Image(image: theme.logoImage, height: 120),
+                          const SizedBox(height: 48.0),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: currentStepWidget,
+                          ),
+                          const SizedBox(height: 24.0),
+                          TextButton(
+                            onPressed: () => _launchUrlRegister(),
+                            child: Text('Don\'t have an account? Register', style: TextStyle(color: theme.secondaryColor)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Version Layer (Bottom Center)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Text(
+                    AppConfig.version,
+                    style: TextStyle(
+                      color: theme.whiteColor.withOpacity(0.4),
+                      fontSize: 14.0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  Future<void> _launchUrlRegister() async {
-    final Uri url = Uri.parse('https://www.emecexpo.com/tickets/');
-    await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 }
 
@@ -146,15 +167,16 @@ class _LoginScreenState extends State<LoginScreen> {
 // =======================================================
 // --- STEP 1: Enter Email Only (Login) ---
 // =======================================================
-
 class LoginStep1 extends StatefulWidget {
   final TextEditingController emailController;
   final Function(String email) onSuccess;
+  final VoidCallback onRegister; // 1. زدنا تعريف المتغير هنا
 
   const LoginStep1({
     required Key key,
     required this.emailController,
     required this.onSuccess,
+    required this.onRegister, // 2. زدناها هنا باش تولي مطلوبة (required)
   }) : super(key: key);
 
   @override
@@ -173,10 +195,8 @@ class _LoginStep1State extends State<LoginStep1> {
   }
 
   Future<void> _sendCode() async {
-    // Prevent API call if local validation fails
     if (!_formKey.currentState!.validate()) return;
 
-    // Hide keyboard while loading
     FocusScope.of(context).unfocus();
 
     setState(() {
@@ -184,7 +204,6 @@ class _LoginStep1State extends State<LoginStep1> {
     });
 
     final AuthApiService authService = AuthApiService();
-    // 💡 API Call for LOGIN verification code
     final Map<String, dynamic> result = await authService.sendVerificationCode(
       widget.emailController.text,
     );
@@ -200,7 +219,7 @@ class _LoginStep1State extends State<LoginStep1> {
         );
         widget.onSuccess(widget.emailController.text);
       } else {
-        // Show error dialog with specific error message if API fails (e.g., email not found)
+        // نمرر الخطأ للدالة الجديدة التي تحتوي على زر التسجيل
         _showErrorDialog(
           result['message'] ?? 'The provided email address is not registered.',
         );
@@ -208,24 +227,32 @@ class _LoginStep1State extends State<LoginStep1> {
     }
   }
 
-  // Error dialog with clear field and refocus logic
+  // دالة الخطأ المعدلة لتكون احترافية
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Authentication Error'),
+        title: const Text('Account Not Found'), // عنوان احترافي
         content: Text(message),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              // Clear the email field
               widget.emailController.clear();
-              // Set focus back to the email field
               _emailFocusNode.requestFocus();
             },
             child: const Text('Okay'),
-          )
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              widget.onRegister(); // استدعاء دالة التسجيل الخارجية
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Provider.of<ThemeProvider>(context, listen: false).currentTheme.secondaryColor,
+            ),
+            child: const Text('Register Now', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );
@@ -251,7 +278,6 @@ class _LoginStep1State extends State<LoginStep1> {
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: theme.whiteColor),
           ),
           const SizedBox(height: 24.0),
-          // Email Input Field
           TextFormField(
             controller: widget.emailController,
             focusNode: _emailFocusNode,
@@ -277,25 +303,14 @@ class _LoginStep1State extends State<LoginStep1> {
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 16.0),
             ),
-            // STRICT EMAIL VALIDATION
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email address';
-              }
-
-              // Strict regex check for a valid email format
+              if (value == null || value.isEmpty) return 'Please enter your email address';
               final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-
-              if (!emailRegex.hasMatch(value)) {
-                return 'Please enter a valid email address (e.g., user@domain.com)';
-              }
-
+              if (!emailRegex.hasMatch(value)) return 'Please enter a valid email address';
               return null;
             },
           ),
           const SizedBox(height: 16.0),
-
-          // Generate One-Time Password Button
           _isLoading
               ? Center(child: CircularProgressIndicator(color: theme.secondaryColor))
               : ElevatedButton(
@@ -309,10 +324,7 @@ class _LoginStep1State extends State<LoginStep1> {
             ),
             child: Text(
               'Generate a one-time password',
-              style: TextStyle(
-                fontSize: 18.0,
-                color: theme.whiteColor,
-              ),
+              style: TextStyle(fontSize: 18.0, color: theme.whiteColor),
             ),
           ),
         ],

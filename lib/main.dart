@@ -59,6 +59,8 @@ import 'package:pharma_health_expo/providers/home_provider.dart';
 import 'package:pharma_health_expo/providers/menu_provider.dart';
 import 'package:pharma_health_expo/constants.dart';
 
+import 'global/app_config.dart';
+
 // Standby fallback container view for unmapped layout paths
 class DullPage extends StatelessWidget {
   final String title;
@@ -415,6 +417,21 @@ class _WelcomPageState extends State<WelcomPage> {
                         );
                       },
                     ),
+
+                    // --- هنا زدنا الـ Version لتحت من الـ Logout ---
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: Text(
+                          AppConfig.version,
+                          style: TextStyle(
+                            color: theme.whiteColor.withOpacity(0.5),
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // ----------------------------------------------
                   ],
                 ),
               ),
