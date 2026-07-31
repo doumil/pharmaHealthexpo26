@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String editionId = "1133";
+  static const String editionId = "1150";
   static const String eventId = "1230";
   static const String apiKey = "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7";
 
