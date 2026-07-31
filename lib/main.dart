@@ -59,6 +59,7 @@ import 'package:pharma_health_expo/providers/menu_provider.dart';
 import 'package:pharma_health_expo/constants.dart';
 
 import 'global/app_config.dart';
+import 'package:pharma_health_expo/api_services/api_global.dart'; // 📌 الاستيراد الجديد للـ API Global
 
 // Standby fallback container view for unmapped layout paths
 class DullPage extends StatelessWidget {
@@ -159,6 +160,16 @@ class _MyAppState extends State<MyApp> {
     debugPrint("🔄 [Main Init] Initiating application configuration prefetch sequence...");
 
     try {
+      // 1️⃣ جلب الـ Edition ID ديناميكياً أولاً قبل باقي الإعدادات
+      try {
+        final fetchedEditionId = await ApiGlobal.fetchActiveEditionId();
+        AppConfig.editionId = fetchedEditionId;
+        debugPrint("✅ [Main Init] Dynamic Edition ID fetched successfully: ${AppConfig.editionId}");
+      } catch (e) {
+        debugPrint("⚠️ [Main Init] Failed to fetch dynamic editionId: $e");
+      }
+
+      // 2️⃣ جلب باقي الإعدادات عبر الـ Provider
       final configProvider = Provider.of<AppConfigProvider>(context, listen: false);
       await configProvider.initializeConfig();
 
@@ -184,14 +195,13 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // إذا كان التطبيق في مرحلة الـ Initialization، نظهر واجهة تحميل زرقاء ملكية متناسقة
     if (_isInitializing) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(
             child: SpinKitCircle(
-              color: Color(0xFF004B9F), // 🟦 تم تغيير اللون الموف إلى الأزرق الملكي د الـ Pharma هنا
+              color: Color(0xFF004B9F),
               size: 50.0,
             ),
           ),
@@ -257,7 +267,6 @@ class _WelcomPageState extends State<WelcomPage> {
     _initializeUserAndLoadData();
   }
 
-  /// Clears persisted runtime context variables and drops authorization tokens
   Future<void> _performLogout() async {
     await prefs.remove('authToken');
     await prefs.remove('currentUserJson');
@@ -272,7 +281,6 @@ class _WelcomPageState extends State<WelcomPage> {
     }
   }
 
-  /// Displays an asynchronous context confirmation layer before dropping scope sessions
   Future<void> _showLogoutConfirmationDialog(BuildContext context, AppThemeData theme) async {
     return showDialog<void>(
       context: context,
@@ -290,7 +298,6 @@ class _WelcomPageState extends State<WelcomPage> {
     );
   }
 
-  /// Reconstitutes profile sessions from offline disk storage layers
   Future<void> _initializeUserAndLoadData() async {
     prefs = await SharedPreferences.getInstance();
     _loggedInUser = widget.user;
@@ -416,8 +423,6 @@ class _WelcomPageState extends State<WelcomPage> {
                         );
                       },
                     ),
-
-                    // --- هنا زدنا الـ Version لتحت من الـ Logout ---
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -430,7 +435,6 @@ class _WelcomPageState extends State<WelcomPage> {
                         ),
                       ),
                     ),
-                    // ----------------------------------------------
                   ],
                 ),
               ),
@@ -471,7 +475,6 @@ class _WelcomPageState extends State<WelcomPage> {
     );
   }
 
-  /// Layout list construction factory representing global application features navigation map
   Widget MyDrawerList({
     required ThemeProvider theme,
     required MenuConfig? menuConfig,
@@ -496,9 +499,7 @@ class _WelcomPageState extends State<WelcomPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           menuItem(DrawerSections.home, "Home", Icons.home, currentSection == DrawerSections.home, onNavigate, true),
-
           const Divider(color: Colors.white24, height: 20),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Text(
@@ -510,16 +511,13 @@ class _WelcomPageState extends State<WelcomPage> {
               ),
             ),
           ),
-
           menuItem(DrawerSections.eFP, "Floor Plan", Icons.location_on_outlined, currentSection == DrawerSections.eFP, onNavigate, floorPlanActive),
           menuItem(DrawerSections.program, "Program", Icons.calendar_today_outlined, currentSection == DrawerSections.program, onNavigate, programActive),
           menuItem(DrawerSections.exhibitors, "Exhibitors", Icons.store_mall_directory_outlined, currentSection == DrawerSections.exhibitors, onNavigate, exhibitorsActive),
           menuItem(DrawerSections.speakers, "Speakers", Icons.speaker_notes_outlined, currentSection == DrawerSections.speakers, onNavigate, speakersActive),
           menuItem(DrawerSections.sponsors, "Sponsors", Icons.favorite_outline, currentSection == DrawerSections.sponsors, onNavigate, sponsorsActive),
           menuItem(DrawerSections.partners, "Partners", Icons.handshake_outlined, currentSection == DrawerSections.partners, onNavigate, partnersActive),
-
           const Divider(color: Colors.white24, height: 20),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Text(
@@ -536,11 +534,8 @@ class _WelcomPageState extends State<WelcomPage> {
           menuItem(DrawerSections.scannedBadges, "Scanned Badges", Icons.qr_code_scanner, currentSection == DrawerSections.scannedBadges, onNavigate, true),
           menuItem(DrawerSections.myAgenda, "My Agenda", Icons.calendar_today_outlined, currentSection == DrawerSections.myAgenda, onNavigate, programActive),
           menuItem(DrawerSections.networking, "Networking", Icons.people_outline, currentSection == DrawerSections.networking, onNavigate, networkingActive),
-
           const Divider(color: Colors.white24, height: 20),
-
           menuItem(DrawerSections.contact, "Contact", Icons.contact_mail_outlined, currentSection == DrawerSections.contact, onNavigate, true),
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Material(
@@ -568,7 +563,6 @@ class _WelcomPageState extends State<WelcomPage> {
     );
   }
 
-  /// Structural item builder factory injecting single node configuration options into the layout drawer
   Widget menuItem(DrawerSections section, String title, IconData icon, bool selected, OnNavigateCallback onNavigate, bool isEnabled) {
     final theme = Provider.of<ThemeProvider>(context, listen: false);
 

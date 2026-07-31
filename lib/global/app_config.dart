@@ -1,6 +1,6 @@
 class AppConfig {
 
-  static const String editionId = "1150";
+  static  String editionId = "";
 
   static const String eventId = "1230";
 
@@ -8,9 +8,9 @@ class AppConfig {
 
   static const String baseUrl = "https://buzzevents.co";
 
-  static const String version = "1.0.2";
+  static const String version = "1.0.3";
 
-  static const String registerUrl = "https://badge.pharmahealthexpo.ma/registration/tickets/4";
+  static const String registerUrl = "https://badge.pharmahealthexpo.ma";
 
   static const String logoBaseUrl = "$baseUrl/uploads/";
 
