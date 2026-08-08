@@ -323,7 +323,7 @@ class _LoginStep1State extends State<LoginStep1> {
               ),
             ),
             child: Text(
-              'Generate a one-time password',
+              'Generate a one-time code',
               style: TextStyle(fontSize: 18.0, color: theme.whiteColor),
             ),
           ),
@@ -465,7 +465,7 @@ class _LoginStep2State extends State<LoginStep2> {
           const SizedBox(height: 16.0),
 
           Text(
-            'Enter the password',
+            'Enter the code',
             textAlign: TextAlign.center,
             style: TextStyle(color: theme.whiteColor.withOpacity(0.8), fontSize: 16),
           ),
@@ -481,7 +481,7 @@ class _LoginStep2State extends State<LoginStep2> {
             decoration: InputDecoration(
               filled: true,
               fillColor: inputFillColor,
-              hintText: 'Password',
+              hintText: 'Code',
               hintStyle: TextStyle(color: inputHintIconColor),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.0),
@@ -615,7 +615,7 @@ class _LoginStep3State extends State<LoginStep3> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Password Reset Error'),
+        title: const Text('Code Reset Error'),
         content: Text(message),
         actions: <Widget>[
           TextButton(
@@ -656,7 +656,7 @@ class _LoginStep3State extends State<LoginStep3> {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
-                    'Forgot Password',
+                    'Forgot code',
                     style: TextStyle(color: theme.whiteColor, fontSize: 22, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -667,7 +667,7 @@ class _LoginStep3State extends State<LoginStep3> {
           const SizedBox(height: 16.0),
 
           Text(
-            'Enter your email to receive a new one-time password.',
+            'Enter your email to receive a new one-time code.',
             textAlign: TextAlign.start,
             style: TextStyle(color: theme.whiteColor.withOpacity(0.8), fontSize: 16),
           ),
@@ -725,7 +725,7 @@ class _LoginStep3State extends State<LoginStep3> {
               ),
             ),
             child: Text(
-              'Send New Password',
+              'Send New code',
               style: TextStyle(
                 fontSize: 18.0,
                 color: theme.whiteColor,

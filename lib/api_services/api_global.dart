@@ -28,7 +28,7 @@ class ApiGlobal {
     } catch (e) {
       print('DEBUG: [ApiGlobal] Error fetching editionId: $e');
       // في حال وقع شي إيرور في الشبكة، كنحطو قيمة افتراضية (مثلاً القديمة باش التطبيق ما يطيحش)
-      return "1150";
+      return "1143";
     }
   }
 }

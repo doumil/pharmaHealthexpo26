@@ -20,7 +20,7 @@ class MenuConfig {
   final bool floorPlan;
   final bool exhibitors;
   final bool speakers;
-  final bool program; // خاص بـ Program Screen
+  final bool program; // خاص بـ Program Screen & My Agenda
   final bool sponsors;
   final bool partners;
   final bool badge;
@@ -58,7 +58,7 @@ class MenuConfig {
       floorPlan: getValue('floor_plan'),
       exhibitors: getValue('exhibitors'),
       speakers: getValue('speakers'),
-      program: getValue('program'), // كيقرا الـ bool ديريكت من السيرفر
+      program: getValue('program'),
       sponsors: getValue('sponsors'),
       partners: getValue('partners'),
       badge: getValue('badge'),
@@ -86,12 +86,14 @@ class MenuProvider with ChangeNotifier {
   void _generateVisibleItems() {
     if (_menuConfig == null) return;
 
-    // 🟩 هنا تم الفصل: تفك الارتباط وبقت كل وحدة تابعة للـ الـ Config ديالها
     final List<Map<String, dynamic>> allItems = [
       {'title': 'My Badge', 'icon': Icons.qr_code_scanner, 'section': DrawerSections.myBadge, 'status': _menuConfig!.badge, 'custom': true},
       {'title': 'Floor Plan', 'icon': Icons.location_on_outlined, 'section': DrawerSections.eFP, 'status': _menuConfig!.floorPlan},
-      {'title': 'Program', 'icon': Icons.event_note, 'section': DrawerSections.program, 'status': _menuConfig!.program}, // شاشة الـ البروݣرام العام
-      {'title': 'My Agenda', 'icon': Icons.calendar_today_outlined, 'section': DrawerSections.myAgenda, 'status': _menuConfig!.badge}, // لـجندة الشخصية (مربوطة بالـ badge/الأكونت)
+      {'title': 'Program', 'icon': Icons.event_note, 'section': DrawerSections.program, 'status': _menuConfig!.program},
+
+      // 💡 My Agenda ولات تابعة ديناميكياً لـ program status فقط
+      {'title': 'My Agenda', 'icon': Icons.calendar_today_outlined, 'section': DrawerSections.myAgenda, 'status': _menuConfig!.program},
+
       {'title': 'Exhibitors', 'icon': Icons.store_mall_directory_outlined, 'section': DrawerSections.exhibitors, 'status': _menuConfig!.exhibitors},
       {'title': 'Networking', 'icon': Icons.people_outline, 'section': DrawerSections.networking, 'status': _menuConfig!.networking},
       {'title': 'Speakers', 'icon': Icons.person_outline, 'section': DrawerSections.speakers, 'status': _menuConfig!.speakers},

@@ -1,5 +1,8 @@
+// lib/notification_detail_screen.dart
 import 'package:flutter/material.dart';
-import 'package:pharma_health_expo/model/notification_model.dart'; // Import your NotifClass model
+import 'package:provider/provider.dart';
+import 'package:pharma_health_expo/model/notification_model.dart';
+import 'package:pharma_health_expo/providers/theme_provider.dart';
 
 class NotificationDetailScreen extends StatelessWidget {
   final NotifClass notification;
@@ -8,15 +11,21 @@ class NotificationDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context).currentTheme;
+
     return Scaffold(
+      backgroundColor: theme.whiteColor,
       appBar: AppBar(
-        title: Text(notification.name),
-        centerTitle: true, // Center the title
-        backgroundColor: const Color(0xff261350),
-        leading: IconButton( // Add a back arrow
+        title: Text(
+          notification.name,
+          style: TextStyle(color: theme.whiteColor),
+        ),
+        centerTitle: true,
+        backgroundColor: theme.primaryColor,
+        iconTheme: IconThemeData(color: theme.whiteColor),
+        leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            // This pops the NotificationDetailScreen off the navigation stack
             Navigator.pop(context);
           },
         ),
@@ -28,14 +37,22 @@ class NotificationDetailScreen extends StatelessWidget {
           children: [
             Text(
               'Date: ${notification.date} at ${notification.dtime}',
-              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                color: theme.primaryColor.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 15),
-            const Divider(), // Optional: A visual separator
+            Divider(color: theme.primaryColor.withOpacity(0.2)),
             const SizedBox(height: 15),
             Text(
               notification.discription,
-              style: const TextStyle(fontSize: 18, height: 1.5), // Line height for better readability
+              style: TextStyle(
+                fontSize: 18,
+                height: 1.5,
+                color: theme.primaryColor,
+              ),
             ),
           ],
         ),

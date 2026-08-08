@@ -126,11 +126,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 🟩 الترتيب السحري الجديد باش تجي My Agenda صغيورة ف الجنب د الـ Badge
   List<MenuItem> _getAllMenuItems(MenuConfig? menuConfig) {
+    final bool isProgramActive = menuConfig?.program ?? true;
+
     return [
       MenuItem(title: 'My Badge', icon: Icons.qr_code_scanner, section: DrawerSections.myBadge, isCustomCard: true, isEnabled: menuConfig?.badge ?? true), // Index 0 -> الكبيرة
-      MenuItem(title: 'Floor Plan', icon: Icons.location_on_outlined, section: DrawerSections.eFP, isEnabled: menuConfig?.floorPlan ?? true), // Index 1 -> الصغيرة الأولى فوق ف الجنب
-      MenuItem(title: 'My Agenda', icon: Icons.calendar_today_outlined, section: DrawerSections.myAgenda, isEnabled: menuConfig?.badge ?? true), // Index 2 -> الصغيرة الثانية تحتها ف الجنب 🎯
-      MenuItem(title: 'Program', icon: Icons.event_note, section: DrawerSections.program, isEnabled: menuConfig?.program ?? true), // باقي الكروت كيجيو ف الـ Grid العادي متناسقين جوج بجوج
+      MenuItem(title: 'Floor Plan', icon: Icons.location_on_outlined, section: DrawerSections.eFP, isEnabled: menuConfig?.floorPlan ?? true), // Index 1 -> الصغيرة الأولى
+
+      // 🎯 هنا ولات My Agenda مرتبطة ديناميكياً بحالة الـ Program (إيلا تفى البرنامج كيتطفى هو وياها)
+      MenuItem(title: 'My Agenda', icon: Icons.calendar_today_outlined, section: DrawerSections.myAgenda, isEnabled: isProgramActive),
+
+      MenuItem(title: 'Program', icon: Icons.event_note, section: DrawerSections.program, isEnabled: isProgramActive), // Program الأساسي
       MenuItem(title: 'Exhibitors', icon: Icons.store_mall_directory_outlined, section: DrawerSections.exhibitors, isEnabled: menuConfig?.exhibitors ?? true),
       MenuItem(title: 'Networking', icon: Icons.people_outline, section: DrawerSections.networking, isEnabled: menuConfig?.networking ?? true),
       MenuItem(title: 'Speakers', icon: Icons.person_outline, section: DrawerSections.speakers, isEnabled: menuConfig?.speakers ?? true),

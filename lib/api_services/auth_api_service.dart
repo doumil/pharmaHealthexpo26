@@ -5,13 +5,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pharma_health_expo/model/user_model.dart';
 import '../global/app_config.dart';
-// 💡 إستيراد الـ Config الجلوبال
+import 'notification_api_service.dart';
 
 class AuthApiService {
-  // 🌐 1. تعويض الروابط والمتغيرات بـ الجلوبال ديريكت
+  // 🌐 اعتماد الروابط والمتغيرات بـ الجلوبال ديريكت
   static final String _baseUrl = "${AppConfig.baseUrl}/api";
-  static final String _editionId = AppConfig.editionId; // 💡 غاتقرأ 1133 الديناميكية
-  static final String _apiKey = AppConfig.apiKey;       // 💡 غاتقرأ الـ Key الموحد
+  static String get _editionId => AppConfig.editionId;
+  static final String _apiKey = AppConfig.apiKey;
 
   // -------------------------------------------------------------------------
   // STEP 1: Send Verification Code to Gmail
@@ -99,7 +99,7 @@ class AuthApiService {
   Future<Map<String, dynamic>> _getFinalFullToken(String smallToken, Map<String, dynamic> userMap, String qrCode) async {
     final String encodedToken = Uri.encodeComponent(smallToken.trim());
 
-    // 💡 عودناها بـ AppConfig.baseUrl باش تحيد www ويتحسن الأداء والموثوقية
+    // 💡 استخدام الرابط المركزي من AppConfig
     final String url = '${AppConfig.baseUrl}/api/login/link?tokenus=$encodedToken';
     final Uri uri = Uri.parse(url);
 
@@ -130,6 +130,9 @@ class AuthApiService {
           await prefs.setString('authToken', fullJwtToken);
           await prefs.setString('currentUserJson', jsonEncode(userMap));
           await prefs.setString('qrCodeXml', qrCode);
+
+          // 🚀 إرسال وتخزين FCM Token للسيرفر أوتوماتيكياً بعد نجاح الدخول
+          await NotificationApiService.initAndSendFcmToken();
 
           return {
             'success': true,

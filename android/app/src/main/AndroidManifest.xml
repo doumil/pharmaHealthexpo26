@@ -11,6 +11,11 @@
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true">
 
+        <!-- 🚀 الأيقونة الافتراضية الجديدة للإشعارات في شريط الحالة -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

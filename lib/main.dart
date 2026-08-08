@@ -2,9 +2,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pharma_health_expo/program_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/material.dart';
 import 'package:pharma_health_expo/providers/app_config_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:badges/badges.dart' as badges;
@@ -34,7 +36,6 @@ import 'package:pharma_health_expo/details/DetailCongress.dart';
 import 'package:pharma_health_expo/details/DetailNetworkin.dart';
 import 'package:pharma_health_expo/partners.dart';
 import 'package:pharma_health_expo/product.dart';
-import 'package:pharma_health_expo/services/local_notification_service.dart';
 import 'package:pharma_health_expo/activities.dart';
 import 'package:pharma_health_expo/My%20Agenda.dart';
 import 'package:pharma_health_expo/Suporting%20Partners.dart';
@@ -49,6 +50,9 @@ import 'package:pharma_health_expo/my_badge_screen.dart';
 import 'package:pharma_health_expo/favourites_screen.dart';
 import 'package:pharma_health_expo/scanned_badges_screen.dart';
 import 'ExpoFloorPlan.dart';
+import 'api_services/local_notification_service.dart';
+import 'api_services/notification_api_service.dart';
+import 'api_services/notification_timer.dart';
 import 'conversations_screen.dart';
 import 'package:pharma_health_expo/meeting_ratings_screen.dart';
 import 'package:pharma_health_expo/model/app_theme_data.dart';
@@ -59,7 +63,23 @@ import 'package:pharma_health_expo/providers/menu_provider.dart';
 import 'package:pharma_health_expo/constants.dart';
 
 import 'global/app_config.dart';
-import 'package:pharma_health_expo/api_services/api_global.dart'; // 📌 الاستيراد الجديد للـ API Global
+import 'package:pharma_health_expo/api_services/api_global.dart';
+
+// 🚀 معالج الإشعارات في الخلفية (Terminated / Background)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint("📩 [Background Notification Received]: ${message.messageId}");
+}
+
+// 🚀 كلاس لتجاوز أخطاء شهادة الأمان (SSL Certificate) للسيرفر التجريبي
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
 
 // Standby fallback container view for unmapped layout paths
 class DullPage extends StatelessWidget {
@@ -89,7 +109,30 @@ List<NotifClass> globalLitems = [];
 var name = "1", date = "1", dtime = "1", discription = "1";
 
 void main() async {
+  // 💡 تفعيل تجاوز أخطاء SSL هنا قبل كل شي
+  HttpOverrides.global = MyHttpOverrides();
+
+  // 🚀 التهيئة الإجبارية لـ Widgets و Firebase لتجنب أي أخطاء في الـ Start
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp();
+
+    // ربط معالج الخلفية لإستقبال الإشعارات والتطبيق مسدود
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    debugPrint("✅ Firebase initialized successfully.");
+  } catch (e) {
+    debugPrint("⚠️ Firebase initialization error: $e");
+  }
+
+// 🔔 تهيئة خدمة الإشعارات المحلية مع تمرير الـ Notifier
+  try {
+    await LocalNotificationService.init(notificationCountNotifier);
+  } catch (e) {
+    debugPrint("⚠️ LocalNotificationService init error: $e");
+  }
+
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final String? authToken = prefs.getString('authToken');
   User? initialUser;
@@ -264,14 +307,45 @@ class _WelcomPageState extends State<WelcomPage> {
   @override
   void initState() {
     super.initState();
+
+    // 🚀 جلب العداد فوراً وتحديث الواجهة والبادج بمهارة ودون انتظار التيمر
+    _fetchAndSyncBadgeImmediately();
+
     _initializeUserAndLoadData();
+
+    // 🚀 تشغيل الـ NotificationTimer المستقل في الخلفية
+    NotificationTimer.start(notificationCountNotifier);
+  }
+
+  @override
+  void dispose() {
+    // 🛑 إيقاف الـ NotificationTimer عند مغادرة الصفحة
+    NotificationTimer.stop();
+    super.dispose();
+  }
+
+  // دالة لجلب العدد وحطه برا فوراً
+  Future<void> _fetchAndSyncBadgeImmediately() async {
+    try {
+      int initialCount = await NotificationApiService.getUnreadCount();
+      notificationCountNotifier.value = initialCount;
+      await AppBadgePlus.updateBadge(initialCount);
+    } catch (e) {
+      debugPrint("⚠️ Error fetching initial unread count: $e");
+    }
   }
 
   Future<void> _performLogout() async {
+    // 🛑 إيقاف الـ NotificationTimer فوراً عند تسجيل الخروج
+    NotificationTimer.stop();
+
     await prefs.remove('authToken');
     await prefs.remove('currentUserJson');
     _loggedInUser = null;
     notificationCountNotifier.value = 0;
+    try {
+      await AppBadgePlus.updateBadge(0);
+    } catch (_) {}
 
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
@@ -320,12 +394,32 @@ class _WelcomPageState extends State<WelcomPage> {
       }
     }
 
+    // 🚀 إرسال الـ FCM Token تلقائياً للسيرفر + جلب عدد الإشعارات الحقيقي من الـ API وتحديث التطبيق وأيقونة التلفون
+    try {
+      await NotificationApiService.initAndSendFcmToken();
+
+      int unreadCount = await NotificationApiService.getUnreadCount();
+      notificationCountNotifier.value = unreadCount;
+
+      try {
+        await AppBadgePlus.updateBadge(unreadCount);
+      } catch (e) {
+        debugPrint("Failed to update app badge: $e");
+      }
+    } catch (e) {
+      debugPrint("Error auto-sending FCM token or fetching notifications in WelcomPage: $e");
+    }
+
     _data = (prefs.getString("Data") ?? '');
     setState(() {
       if (_data == "1") currentPage = DrawerSections.exhibitors;
       else if (_data == "2") currentPage = DrawerSections.congressmenu;
       else if (_data == "3") currentPage = DrawerSections.business;
-      else if (_data == "4") { currentPage = DrawerSections.notifications; notificationCountNotifier.value = 0; }
+      else if (_data == "4") {
+        currentPage = DrawerSections.notifications;
+        notificationCountNotifier.value = 0;
+        try { AppBadgePlus.updateBadge(0); } catch (_) {}
+      }
       else if (_data == "5") currentPage = DrawerSections.congressmenu;
       else if (_data == "6") currentPage = DrawerSections.detailexhib;
       else if (_data == "7") currentPage = DrawerSections.detailcongress;
@@ -467,7 +561,13 @@ class _WelcomPageState extends State<WelcomPage> {
           backgroundColor: theme.primaryColor,
           onTap: (index) async {
             if (index == 0) _onNavigateToSection(DrawerSections.home);
-            else if (index == 1) { _onNavigateToSection(DrawerSections.notifications); notificationCountNotifier.value = 0; }
+            else if (index == 1) {
+              _onNavigateToSection(DrawerSections.notifications);
+              notificationCountNotifier.value = 0;
+              try {
+                await AppBadgePlus.updateBadge(0);
+              } catch (_) {}
+            }
             else if (index == 2) _scaffoldKey.currentState?.openEndDrawer();
           },
         ),
@@ -569,10 +669,13 @@ class _WelcomPageState extends State<WelcomPage> {
     return Material(
       color: selected ? Colors.white12 : Colors.transparent,
       child: InkWell(
-        onTap: isEnabled ? () {
+        onTap: isEnabled ? () async {
           onNavigate(section);
           if (section == DrawerSections.notifications) {
             notificationCountNotifier.value = 0;
+            try {
+              await AppBadgePlus.updateBadge(0);
+            } catch (_) {}
           }
         } : null,
         child: Opacity(

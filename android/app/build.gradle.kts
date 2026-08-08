@@ -5,6 +5,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 val keystorePropertiesFile = rootProject.file("key.properties")
@@ -19,6 +20,9 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // 🚀 تفعيل الـ Desugaring هنا
+        isCoreLibraryDesugaringEnabled = true
+
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -58,11 +62,15 @@ android {
     }
 }
 
+dependencies {
+    // 🚀 إضافة مكتبة الـ Desugaring في قسم الـ dependencies
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
 flutter {
     source = "../.."
 }
 
-// 🛠️ التعديل هنا: رد بالك للـ "s" صغيرة باش يقبلها الـ Gradle Compiler
 subprojects {
     if (project.name == "google_maps_flutter_android") {
         project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension>()?.apply {

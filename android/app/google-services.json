@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "964728357110",
+    "project_id": "pharma-health-expo",
+    "storage_bucket": "pharma-health-expo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:964728357110:android:3f97376ba853b81a076cd7",
+        "android_client_info": {
+          "package_name": "com.pharmahealthexpo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAKc7c__lbtaGGICA-Ic_VzbDLR1e4DV8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -40,8 +40,8 @@ class HomeProvider with ChangeNotifier {
     if (data == null) return;
 
     String checkState(String dataKey) {
-      // إذا كنا نتحقق من My Agenda، نربطها بحالة الـ badge
-      String finalKey = (dataKey == 'my_agenda') ? 'badge' : dataKey;
+      // 💡 هنا ربطنا my_agenda بـ program ديناميكياً باش تتبع الحالة ديالو
+      String finalKey = (dataKey == 'my_agenda') ? 'program' : dataKey;
 
       dynamic value = data[finalKey];
       if (value == null) {
@@ -76,8 +76,11 @@ class HomeProvider with ChangeNotifier {
     return [
       CardItem(title: 'My Badge', iconName: 'qr_code_scanner', dataValue: '1', isCustomCard: true, apiKey: 'badge'),
       CardItem(title: 'Floor Plan', iconName: 'location_on_outlined', dataValue: '1', apiKey: 'floor_plan'),
-      CardItem(title: 'Program', iconName: 'event_note', dataValue: '1', apiKey: 'program'), // تابعة لـ program ف الـ API
-      CardItem(title: 'My Agenda', iconName: 'calendar_today_outlined', dataValue: '1', apiKey: 'my_agenda'), // تابعة للـ badge/user حسابيا
+      CardItem(title: 'Program', iconName: 'event_note', dataValue: '1', apiKey: 'program'),
+
+      // 💡 apiKey ولات 'program' باش تأخد نفس حالة الـ Program
+      CardItem(title: 'My Agenda', iconName: 'calendar_today_outlined', dataValue: '1', apiKey: 'program'),
+
       CardItem(title: 'Exhibitors', iconName: 'store_mall_directory_outlined', dataValue: '1', apiKey: 'exhibitors'),
       CardItem(title: 'Conferences', iconName: 'speaker_notes_outlined', dataValue: '1', apiKey: 'speakers'),
       CardItem(title: 'Institutional\nPartners', iconName: 'handshake_outlined', dataValue: '1', apiKey: 'partners'),
