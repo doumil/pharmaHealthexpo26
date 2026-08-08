@@ -11,7 +11,8 @@ import '../model/exposant_networking_model.dart';
 import '../api_services/networking_api_service.dart';
 import '../providers/theme_provider.dart';
 import '../details/CommerciauxScreen.dart';
-import '../main.dart'; // 💡 استيراد الـ main باش يقرا الـ WelcomPage
+import '../main.dart';
+import 'main/welcome_page.dart'; // 💡 استيراد الـ main باش يقرا الـ WelcomPage
 
 class NetworkinScreen extends StatefulWidget {
   final String? authToken;

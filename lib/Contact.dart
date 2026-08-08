@@ -10,6 +10,7 @@ import '../providers/theme_provider.dart';
 import '../main.dart';
 import '../model/app_theme_data.dart';
 import 'global/app_config.dart';
+import 'main/welcome_page.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({Key? key}) : super(key: key);

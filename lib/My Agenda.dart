@@ -13,6 +13,7 @@ import '../services/agenda_local_service.dart';
 import '../services/google_calendar_service.dart';
 import 'details/detail_program_screen.dart';
 import 'main.dart'; // Assuming WelcomPage is here
+import 'main/welcome_page.dart';
 import 'program_screen.dart' hide ProgramApiService;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:animate_do/animate_do.dart';

@@ -14,7 +14,8 @@ import 'package:pharma_health_expo/api_services/exhibitor_api_service.dart';
 import 'package:pharma_health_expo/model/app_theme_data.dart';
 
 import 'details/DetailExhibitors.dart';
-import 'main.dart'; // Assuming this imports WelcomPage
+import 'main.dart';
+import 'main/welcome_page.dart'; // Assuming this imports WelcomPage
 
 class PartnersScreen extends StatefulWidget {
   const PartnersScreen({Key? key}) : super(key: key);

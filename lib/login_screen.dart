@@ -9,6 +9,7 @@ import 'package:pharma_health_expo/main.dart';
 import 'package:pharma_health_expo/api_services/auth_api_service.dart';
 import 'package:pharma_health_expo/model/app_theme_data.dart';
 import 'global/app_config.dart';
+import 'main/welcome_page.dart';
 
 enum LoginStep { enterEmail, verifyCode, forgetPassword }
 

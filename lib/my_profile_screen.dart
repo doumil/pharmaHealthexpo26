@@ -7,6 +7,7 @@ import 'package:pharma_health_expo/model/user_model.dart';
 import 'package:pharma_health_expo/login_screen.dart';
 
 import 'main.dart'; // Contains WelcomPage
+import 'main/welcome_page.dart';
 import 'model/app_theme_data.dart'; // Contains AppThemeData
 
 class MyProfileScreen extends StatefulWidget {

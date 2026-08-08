@@ -5,6 +5,7 @@ import 'package:provider/provider.dart'; // 💡 Import Provider
 import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import ThemeProvider
 import '../model/favorite_item_model.dart';
 import 'main.dart';
+import 'main/welcome_page.dart';
 import 'model/app_theme_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

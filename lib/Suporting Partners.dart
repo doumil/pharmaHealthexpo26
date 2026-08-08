@@ -16,6 +16,7 @@ import 'package:pharma_health_expo/model/app_theme_data.dart';
 
 import 'details/DetailExhibitors.dart';
 import 'main.dart';
+import 'main/welcome_page.dart';
 
 // Define a simple data structure for sponsor categories
 class SponsorCategory {

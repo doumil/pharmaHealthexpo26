@@ -15,6 +15,7 @@ import 'details/DetailSpeakeres.dart';
 import '../main.dart';
 import '../model/speakers_model.dart';
 import '../providers/theme_provider.dart';
+import 'main/welcome_page.dart';
 
 class SpeakersScreen extends StatefulWidget {
   const SpeakersScreen({Key? key}) : super(key: key);

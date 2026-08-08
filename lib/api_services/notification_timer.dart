@@ -1,9 +1,10 @@
-// lib/services/notification_timer.dart
+// lib/api_services/notification_timer.dart
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:pharma_health_expo/api_services/notification_api_service.dart';
 import 'package:pharma_health_expo/model/notification_model.dart';
+import 'package:pharma_health_expo/global/app_config.dart';
 
 import 'local_notification_service.dart';
 
@@ -19,10 +20,17 @@ class NotificationTimer {
         // 1. جلب العدد الحقيقي الحالي من الـ API
         int serverCount = await NotificationApiService.getUnreadCount();
 
-        // 2. إذا كان العدد الجديد في السيرفر أكبر من القيمة اللي كاينة في التطبيق، معناه كاين إشعار جديد
+        // 2. إيلا رجعت -1 معناها التوكين سالا ف الخلفية
+        if (serverCount == -1) {
+          debugPrint("🔒 Token expired detected in periodic timer. Forcing logout.");
+          await AppConfig.forceLogout();
+          stop();
+          return;
+        }
+
+        // 3. إذا كان العدد الجديد في السيرفر أكبر، معناه كاين إشعار جديد
         if (serverCount > countNotifier.value) {
           try {
-            // 3. جلب قائمة الإشعارات باش ناخدو آخر إشعار وصل ونعرضوه في البار
             List<NotifClass> notifications = await NotificationApiService.fetchNotifications();
 
             if (notifications.isNotEmpty) {
@@ -38,7 +46,6 @@ class NotificationTimer {
                   ? latestNotif.discription!
                   : "You have a new unread message.";
 
-              // 4. إظهار الإشعار في البار ديال التليفون مع إعطاء id فريد
               await LocalNotificationService.showNotification(
                 title: title,
                 body: body,
@@ -50,11 +57,11 @@ class NotificationTimer {
               );
             }
           } catch (e) {
-            debugPrint("⚠️ Error fetching latest notification details for status bar: $e");
+            debugPrint("⚠️ Error fetching latest notification details: $e");
           }
         }
 
-        // 5. بغض النظر واش كاين إشعار جديد ولا لا، كنخليو العداد والـ Badge يطابقو ديما السيرفر 100%
+        // 4. تحديث العداد والـ Badge
         if (countNotifier.value != serverCount) {
           countNotifier.value = serverCount;
           try {
@@ -66,13 +73,17 @@ class NotificationTimer {
         }
       } catch (e) {
         debugPrint("⚠️ Periodic notification timer check error: $e");
+        if (e.toString().contains("TOKEN_EXPIRED") || e.toString().contains("401")) {
+          await AppConfig.forceLogout();
+          stop();
+        }
       }
     });
 
     debugPrint("✅ NotificationTimer started successfully.");
   }
 
-  /// إيقاف الـ Timer (عند تسجيل الخروج مثلاً)
+  /// إيقاف الـ Timer
   static void stop() {
     _timer?.cancel();
     _timer = null;

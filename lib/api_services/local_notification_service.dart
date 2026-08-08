@@ -27,11 +27,11 @@ class LocalNotificationService {
       },
     );
 
-    // 🚀 الإضافة المهمة: الاستماع للإشعارات فاش كيكون التطبيق محلول (Foreground)
+    // 🚀 الاستماع للإشعارات فاش كيكون التطبيق محلول (Foreground)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       debugPrint("📩 [Foreground FCM Received]: ${message.notification?.title}");
 
-      // 1. عرض الإشعار محلياً في البار إذا كان جاي من الـ Payload
+      // 1. عرض الإشعار محلياً في البار
       if (message.notification != null) {
         await showNotification(
           title: message.notification?.title ?? "New Notification",
@@ -39,14 +39,16 @@ class LocalNotificationService {
         );
       }
 
-      // 2. جلب العدد الحقيقي فوراً من السيرفر وتحديث البادج والـ Notifier (بحال 21)
+      // 2. جلب العدد الحقيقي فوراً من السيرفر وتحديث البادج والـ Notifier
       try {
         int realCount = await NotificationApiService.getUnreadCount();
-        if (countNotifier != null) {
-          countNotifier.value = realCount;
+        if (realCount >= 0) {
+          if (countNotifier != null) {
+            countNotifier.value = realCount;
+          }
+          await AppBadgePlus.updateBadge(realCount);
+          debugPrint("🔄 Real badge & counter updated on foreground push: $realCount");
         }
-        await AppBadgePlus.updateBadge(realCount);
-        debugPrint("🔄 Real badge & counter updated on foreground push: $realCount");
       } catch (e) {
         debugPrint("⚠️ Error syncing badge on foreground message: $e");
       }
@@ -80,7 +82,7 @@ class LocalNotificationService {
         notificationDetails: platformChannelSpecifics,
       );
       debugPrint("✅ Local notification shown successfully: $title");
-    } catch (e) {
+    }catch (e) {
       debugPrint("❌ Error showing local notification: $e");
     }
   }

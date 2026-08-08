@@ -19,6 +19,7 @@ import 'package:pharma_health_expo/api_services/exhibitor_api_service.dart';
 import 'package:pharma_health_expo/details/DetailExhibitors.dart';
 
 import 'main.dart';
+import 'main/welcome_page.dart';
 import 'model/app_theme_data.dart';
 
 class ExhibitorsScreen extends StatefulWidget {

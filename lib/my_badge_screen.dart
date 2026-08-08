@@ -7,7 +7,8 @@ import 'package:pharma_health_expo/providers/theme_provider.dart'; // Import The
 import 'package:pharma_health_expo/model/user_model.dart';
 import 'package:pharma_health_expo/model/app_theme_data.dart';
 
-import 'main.dart'; // Assuming this defines your theme structure
+import 'main.dart';
+import 'main/welcome_page.dart'; // Assuming this defines your theme structure
 
 class MyBadgeScreen extends StatefulWidget {
   final User user;

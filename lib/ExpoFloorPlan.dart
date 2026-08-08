@@ -11,7 +11,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Assuming thi
 import 'package:pharma_health_expo/api_services/plan_api_service.dart';
 import 'package:pharma_health_expo/providers/theme_provider.dart';
 
-import 'main.dart'; // For WelcomPage
+import 'main.dart';
+import 'main/welcome_page.dart'; // For WelcomPage
 
 // Define the path to your SVG asset file
 const String kMapErrorAssetPath = 'assets/icons/map-simple-off-svgrepo-com.svg';

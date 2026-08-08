@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Local imports
 import 'package:pharma_health_expo/providers/theme_provider.dart';
 import 'main.dart';
+import 'main/welcome_page.dart';
 
 class GetThereScreen extends StatefulWidget {
   const GetThereScreen({Key? key}) : super(key: key);

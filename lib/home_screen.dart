@@ -1,5 +1,4 @@
 // lib/home_screen.dart
-
 import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:pharma_health_expo/login_screen.dart';
 import 'package:pharma_health_expo/providers/menu_provider.dart';
 import 'package:pharma_health_expo/providers/theme_provider.dart';
 import 'package:pharma_health_expo/global/app_config.dart';
+import 'package:pharma_health_expo/auth_popup.dart'; // 👈 استدعاء الـ Popup
 import 'model/app_theme_data.dart';
 import 'main.dart';
 
@@ -44,6 +44,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   User? _loggedInUser;
   late SharedPreferences prefs;
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
@@ -53,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeUserAndToken() async {
     prefs = await SharedPreferences.getInstance();
+    final String? authToken = prefs.getString('authToken');
     User? userFromWidget = widget.user;
     User? userFromPrefs;
 
@@ -68,15 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     setState(() {
-      _loggedInUser = userFromWidget ??
-          userFromPrefs ??
-          User(
-            id: 0,
-            name: "Guest",
-            nom: "User",
-            prenom: "",
-            email: "guest@example.com",
-          );
+      _isLoggedIn = authToken != null && authToken.isNotEmpty;
+      _loggedInUser = userFromWidget ?? userFromPrefs;
     });
   }
 
@@ -124,18 +119,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🟩 الترتيب السحري الجديد باش تجي My Agenda صغيورة ف الجنب د الـ Badge
   List<MenuItem> _getAllMenuItems(MenuConfig? menuConfig) {
     final bool isProgramActive = menuConfig?.program ?? true;
 
     return [
-      MenuItem(title: 'My Badge', icon: Icons.qr_code_scanner, section: DrawerSections.myBadge, isCustomCard: true, isEnabled: menuConfig?.badge ?? true), // Index 0 -> الكبيرة
-      MenuItem(title: 'Floor Plan', icon: Icons.location_on_outlined, section: DrawerSections.eFP, isEnabled: menuConfig?.floorPlan ?? true), // Index 1 -> الصغيرة الأولى
-
-      // 🎯 هنا ولات My Agenda مرتبطة ديناميكياً بحالة الـ Program (إيلا تفى البرنامج كيتطفى هو وياها)
+      MenuItem(title: 'My Badge', icon: Icons.qr_code_scanner, section: DrawerSections.myBadge, isCustomCard: true, isEnabled: menuConfig?.badge ?? true),
+      MenuItem(title: 'Floor Plan', icon: Icons.location_on_outlined, section: DrawerSections.eFP, isEnabled: menuConfig?.floorPlan ?? true),
       MenuItem(title: 'My Agenda', icon: Icons.calendar_today_outlined, section: DrawerSections.myAgenda, isEnabled: isProgramActive),
-
-      MenuItem(title: 'Program', icon: Icons.event_note, section: DrawerSections.program, isEnabled: isProgramActive), // Program الأساسي
+      MenuItem(title: 'Program', icon: Icons.event_note, section: DrawerSections.program, isEnabled: isProgramActive),
       MenuItem(title: 'Exhibitors', icon: Icons.store_mall_directory_outlined, section: DrawerSections.exhibitors, isEnabled: menuConfig?.exhibitors ?? true),
       MenuItem(title: 'Networking', icon: Icons.people_outline, section: DrawerSections.networking, isEnabled: menuConfig?.networking ?? true),
       MenuItem(title: 'Speakers', icon: Icons.person_outline, section: DrawerSections.speakers, isEnabled: menuConfig?.speakers ?? true),
@@ -162,7 +153,18 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return GestureDetector(
-      onTap: item.isEnabled ? () => widget.onNavigate(item.section) : null,
+      onTap: item.isEnabled ? () {
+        // التحقق واش القسم محمي واليوزر مشي مسجل
+        bool isProtected = item.section == DrawerSections.myBadge ||
+            item.section == DrawerSections.myAgenda ||
+            item.section == DrawerSections.networking;
+
+        if (!_isLoggedIn && isProtected) {
+          AuthPopup.show(context); // 👈 إظهار بوب أب تسجيل الدخول
+        } else {
+          widget.onNavigate(item.section);
+        }
+      } : null,
       child: Container(
         height: cardHeight,
         decoration: BoxDecoration(
@@ -209,6 +211,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = themeProvider.currentTheme;
+
+    String displayName = _isLoggedIn
+        ? (_loggedInUser?.prenom ?? _loggedInUser?.name ?? 'User')
+        : 'Visitor';
 
     return Consumer<MenuProvider>(
       builder: (context, menuProvider, child) {
@@ -343,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
             appBar: AppBar(
               title: Center(
                 child: Text(
-                  'Welcome, ${_loggedInUser?.prenom ?? _loggedInUser?.name ?? 'Guest'}!',
+                  'Welcome, $displayName!',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -354,11 +360,26 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               backgroundColor: theme.blackColor,
               actions: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.logout, color: theme.whiteColor),
-                  onPressed: () => _showLogoutConfirmationDialog(context, theme),
-                  tooltip: 'Logout',
-                ),
+                // زر الخروج يظهر فقط إذا كان اليوزر مسجل دخول
+                if (_isLoggedIn)
+                  IconButton(
+                    icon: Icon(Icons.logout, color: theme.whiteColor),
+                    onPressed: () => _showLogoutConfirmationDialog(context, theme),
+                    tooltip: 'Logout',
+                  )
+                else
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
+                    },
+                    child: Text(
+                      "Login",
+                      style: TextStyle(color: theme.secondaryColor, fontWeight: FontWeight.bold),
+                    ),
+                  ),
               ],
               elevation: 0,
             ),

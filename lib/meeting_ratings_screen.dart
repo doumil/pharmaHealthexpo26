@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // 💡 Import the Provider package
 import 'package:pharma_health_expo/providers/theme_provider.dart';
 
-import 'main.dart'; // 💡 Import your ThemeProvider
+import 'main.dart';
+import 'main/welcome_page.dart'; // 💡 Import your ThemeProvider
 
 class MeetingRatingsScreen extends StatelessWidget {
   const MeetingRatingsScreen({super.key});

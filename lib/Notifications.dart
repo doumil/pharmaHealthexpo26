@@ -10,6 +10,7 @@ import 'api_services/notification_api_service.dart';
 import 'details/notification_detail_screen.dart';
 import 'home_screen.dart';
 import 'main.dart';
+import 'main/welcome_page.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
@@ -28,9 +29,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _loadNotifications();
   }
 
+  // 🚀 هنا فين كاين السر: جبد اللستة + سيفط جبد العدد الحقيقي من السيرفر مباشرة
   void _loadNotifications() {
     setState(() {
-      _notificationsFuture = NotificationApiService.fetchNotifications();
+      _notificationsFuture = NotificationApiService.fetchNotifications().then((list) async {
+        // طلب العدد الحقيقي مباشرة من API باش مايكونش تفاوت نهائياً
+        int realCount = await NotificationApiService.getUnreadCount();
+        if (realCount >= 0) {
+          notificationCountNotifier.value = realCount;
+          try {
+            await AppBadgePlus.updateBadge(realCount);
+          } catch (e) {
+            debugPrint("Failed to update badge: $e");
+          }
+        }
+        return list;
+      });
     });
   }
 
@@ -42,13 +56,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           notification.isRead = true;
         });
 
-        int currentCount = notificationCountNotifier.value;
-        if (currentCount > 0) {
-          int newCount = currentCount - 1;
-          notificationCountNotifier.value = newCount;
-
+        // 🚀 مور ما تقرأت، عيط فوراً للـ API باش يعطيك العدد الحقيقي الجديد (بلا حَسَاب العياقة ديال -1)
+        int realCount = await NotificationApiService.getUnreadCount();
+        if (realCount >= 0) {
+          notificationCountNotifier.value = realCount;
           try {
-            await AppBadgePlus.updateBadge(newCount);
+            await AppBadgePlus.updateBadge(realCount);
           } catch (e) {
             debugPrint("Failed to update app badge on tap: $e");
           }
@@ -65,7 +78,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  // قراءة الكل عبر الـ API الجديد
+  // قراءة الكل عبر الـ API
   void _markAllAsRead(List<NotifClass> notifications) async {
     bool success = await NotificationApiService.markAllAsRead();
 
@@ -149,14 +162,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   itemCount: notifications.length,
                   itemBuilder: (context, index) {
                     final notification = notifications[index];
-
-                    // الفرق في الشكل بين المقروء وغير المقروء
                     final bool isUnread = !notification.isRead;
 
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      elevation: isUnread ? 4 : 1, // غير المقروء كيكون بارز أكثر
-                      // إيلا بغيتي لون خلفية خفيف لغير المقروء مستوحى من الثيم:
+                      elevation: isUnread ? 4 : 1,
                       color: isUnread ? theme.primaryColor.withOpacity(0.06) : null,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -168,7 +178,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         title: Text(
                           notification.title.isNotEmpty ? notification.title : notification.name,
                           style: TextStyle(
-                            // غير المقروء كيكون Bold، والمقروء عادي
                             fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
                             fontSize: 16,
                           ),
@@ -183,7 +192,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ),
                         ),
                         isThreeLine: true,
-                        // علامة أو نقطة في الجنب تظهر فقط لغير المقروء
                         trailing: isUnread
                             ? CircleAvatar(
                           radius: 5,
@@ -196,7 +204,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   },
                 ),
 
-                // زر Mark all as read في الأسفل
                 if (hasUnread)
                   Positioned(
                     bottom: 16,

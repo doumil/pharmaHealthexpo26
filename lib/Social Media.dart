@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart'; // 💡 Import Provider
 import 'package:pharma_health_expo/providers/theme_provider.dart'; // 💡 Import your ThemeProvider
 import 'main.dart';
+import 'main/welcome_page.dart';
 import 'model/app_theme_data.dart'; // 💡 Import your AppThemeData
 import 'package:pharma_health_expo/tabs/FACEBOOK.dart';
 import 'package:pharma_health_expo/tabs/INSTAGRAM.dart';
