@@ -23,7 +23,7 @@ class AppConfig {
   static const String baseUrl = "https://buzzevents.co";
   // ==========================================
 
-  static const String version = "1.0.5";
+  static const String version = "1.0.6";
   static const String registerUrl = "https://badge.pharmahealthexpo.ma";
   static const String logoBaseUrl = "$baseUrl/uploads/";
 

@@ -66,7 +66,7 @@ class _WelcomPageState extends State<WelcomPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // مراقبة حالة التطبيق (Foreground / Background)
+    WidgetsBinding.instance.addObserver(this);
     WelcomeLogic.fetchAndSyncBadgeImmediately();
     _loadUser();
     NotificationTimer.start(notificationCountNotifier);
@@ -74,12 +74,11 @@ class _WelcomPageState extends State<WelcomPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // إلغاء المراقبة لتفادي تسريب الذاكرة
+    WidgetsBinding.instance.removeObserver(this);
     NotificationTimer.stop();
     super.dispose();
   }
 
-  // تخدم أوتوماتيكياً فاش كيرجع اليوزر للتطبيق من الخلفية
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -130,9 +129,14 @@ class _WelcomPageState extends State<WelcomPage> with WidgetsBindingObserver {
     );
   }
 
+  bool get _isUserLoggedIn {
+    return (_loggedInUser?.token != null && _loggedInUser!.token!.isNotEmpty) ||
+        (widget.user?.token != null && widget.user!.token!.isNotEmpty);
+  }
+
   int _getBottomNavIndexForBottomNav() {
     if (currentPage == DrawerSections.home) return 0;
-    if (currentPage == DrawerSections.notifications) return 1;
+    if (_isUserLoggedIn && currentPage == DrawerSections.notifications) return 1;
     return 0;
   }
 
@@ -147,7 +151,8 @@ class _WelcomPageState extends State<WelcomPage> with WidgetsBindingObserver {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = themeProvider.currentTheme;
 
-    User currentUser = _loggedInUser ?? User(id: 0, name: "Guest User", email: "guest@app.com", token: "");
+    // اعتماد User أولي فوري باش ميبقاش أي لودينغ أبيض فالبداية، وتتكلف HomeScreen بالتحميل الداخلي
+    User currentUser = _loggedInUser ?? widget.user ?? User(id: 0, name: "", email: "", token: "");
     Widget container;
 
     if (currentPage == DrawerSections.home) container = HomeScreen(user: currentUser, onNavigate: _handleProtectedNavigation);
@@ -175,14 +180,39 @@ class _WelcomPageState extends State<WelcomPage> with WidgetsBindingObserver {
     else if (currentPage == DrawerSections.sponsors) container = SupportingPScreen();
     else container = Center(child: const DullPage(title: 'Page Not Found'));
 
+    final List<BottomNavigationBarItem> navItems = [
+      const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+      if (_isUserLoggedIn)
+        BottomNavigationBarItem(
+          icon: ValueListenableBuilder<int>(
+            valueListenable: notificationCountNotifier,
+            builder: (context, count, child) {
+              return badges.Badge(
+                showBadge: count > 0,
+                badgeContent: Text(count.toString(), style: TextStyle(color: theme.whiteColor, fontSize: 10)),
+                badgeStyle: badges.BadgeStyle(badgeColor: theme.redColor, padding: const EdgeInsets.all(5)),
+                position: badges.BadgePosition.topEnd(top: -10, end: -12),
+                child: const Icon(Icons.notifications),
+              );
+            },
+          ),
+          label: 'Notifications',
+        ),
+      const BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Menu'),
+    ];
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         key: _scaffoldKey,
         body: container,
         endDrawer: Drawer(
+          backgroundColor: theme.primaryColor,
           child: SafeArea(
-            top: true, bottom: true, left: false, right: false,
+            top: true,
+            bottom: false,
+            left: false,
+            right: false,
             child: SingleChildScrollView(
               child: Container(
                 color: theme.primaryColor,
@@ -195,16 +225,13 @@ class _WelcomPageState extends State<WelcomPage> with WidgetsBindingObserver {
                       builder: (context, menuProvider, child) {
                         final menuConfig = menuProvider.menuConfig;
 
-                        // تحديد واش اليوزر مسجل دخول بناءً على الـ token
-                        bool isUserLoggedIn = currentUser.token != null && currentUser.token!.isNotEmpty;
-
                         return AppDrawerList(
                           menuConfig: menuConfig,
                           onNavigate: _handleProtectedNavigation,
                           currentSection: currentPage,
                           showLogoutDialog: _showLogoutDialog,
                           appTheme: theme,
-                          isLoggedIn: isUserLoggedIn, // تمرير المتغير هنا بنجاح
+                          isLoggedIn: _isUserLoggedIn,
                         );
                       },
                     ),
@@ -227,37 +254,29 @@ class _WelcomPageState extends State<WelcomPage> with WidgetsBindingObserver {
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
-            const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: ValueListenableBuilder<int>(
-                valueListenable: notificationCountNotifier,
-                builder: (context, count, child) {
-                  return badges.Badge(
-                    showBadge: count > 0,
-                    badgeContent: Text(count.toString(), style: TextStyle(color: theme.whiteColor, fontSize: 10)),
-                    badgeStyle: badges.BadgeStyle(badgeColor: theme.redColor, padding: const EdgeInsets.all(5)),
-                    position: badges.BadgePosition.topEnd(top: -10, end: -12),
-                    child: const Icon(Icons.notifications),
-                  );
-                },
-              ),
-              label: 'Notifications',
-            ),
-            const BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Menu'),
-          ],
+          items: navItems,
           currentIndex: _getBottomNavIndexForBottomNav(),
           selectedItemColor: theme.secondaryColor,
           unselectedItemColor: theme.whiteColor,
           backgroundColor: theme.primaryColor,
           onTap: (index) async {
-            if (index == 0) _handleProtectedNavigation(DrawerSections.home);
-            else if (index == 1) {
-              _handleProtectedNavigation(DrawerSections.notifications);
-              notificationCountNotifier.value = 0;
-              try { await AppBadgePlus.updateBadge(0); } catch (_) {}
+            if (!_isUserLoggedIn) {
+              if (index == 0) {
+                _handleProtectedNavigation(DrawerSections.home);
+              } else if (index == 1) {
+                _scaffoldKey.currentState?.openEndDrawer();
+              }
+            } else {
+              if (index == 0) {
+                _handleProtectedNavigation(DrawerSections.home);
+              } else if (index == 1) {
+                _handleProtectedNavigation(DrawerSections.notifications);
+                notificationCountNotifier.value = 0;
+                try { await AppBadgePlus.updateBadge(0); } catch (_) {}
+              } else if (index == 2) {
+                _scaffoldKey.currentState?.openEndDrawer();
+              }
             }
-            else if (index == 2) _scaffoldKey.currentState?.openEndDrawer();
           },
         ),
       ),

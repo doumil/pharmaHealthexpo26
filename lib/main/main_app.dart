@@ -1,6 +1,5 @@
 // lib/main/main_app.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:pharma_health_expo/providers/theme_provider.dart';
 import 'package:pharma_health_expo/providers/app_config_provider.dart';
@@ -8,6 +7,7 @@ import 'package:pharma_health_expo/providers/menu_provider.dart';
 import 'package:pharma_health_expo/providers/home_provider.dart';
 import 'package:pharma_health_expo/global/app_config.dart';
 import 'package:pharma_health_expo/api_services/api_global.dart';
+import 'package:pharma_health_expo/api_services/notification_api_service.dart';
 import 'welcome_page.dart';
 
 class MyApp extends StatefulWidget {
@@ -19,8 +19,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool _isInitializing = true;
-
   @override
   void initState() {
     super.initState();
@@ -31,6 +29,9 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _loadInitialData() async {
     try {
+      // 🔔 Talab izin notifications o irsal FCM token direct f al-bidaya
+      await NotificationApiService.requestNotificationPermission(context);
+
       final fetchedEditionId = await ApiGlobal.fetchActiveEditionId();
       AppConfig.editionId = fetchedEditionId;
 
@@ -45,25 +46,10 @@ class _MyAppState extends State<MyApp> {
     } catch (e) {
       debugPrint("⚠️ Initialization sequence faulted: $e");
     }
-
-    if (mounted) {
-      setState(() { _isInitializing = false; });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isInitializing) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Center(
-            child: SpinKitCircle(color: Color(0xFF004B9F), size: 50.0),
-          ),
-        ),
-      );
-    }
-
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         final currentTheme = themeProvider.currentTheme;

@@ -41,6 +41,7 @@ class AppDrawerList extends StatelessWidget {
     final networkingActive = menuConfig?.networking ?? true;
 
     return Container(
+      color: themeProvider.currentTheme.primaryColor, // 🛑 زدنا هذي باش الـ Container يشد لون الثيم التحتاني وما يبانش اختلاف فاللون
       padding: const EdgeInsets.only(top: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +139,6 @@ class AppDrawerList extends StatelessWidget {
               section == DrawerSections.scannedBadges;
 
           if (!isLoggedIn && isProtectedSection) {
-            // 🛑 التصحيح هنا: استخدام ScaffoldState مباشرة بدون .currentState
             final scaffoldState = Scaffold.maybeOf(context);
             if (scaffoldState?.isEndDrawerOpen ?? false) {
               Navigator.pop(context);

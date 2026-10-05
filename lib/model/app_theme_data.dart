@@ -80,7 +80,7 @@ class AppThemeData {
 
   static AppThemeData defaultTheme() {
     return AppThemeData(
-      primaryColor: const Color(0xff50134f),
+      primaryColor: const Color(0xFF0056B3),
       secondaryColor: const Color(0xff00C1C1),
       blackColor: Colors.black,
       whiteColor: Colors.white,

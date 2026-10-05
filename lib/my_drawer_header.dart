@@ -37,7 +37,7 @@ class MyHeaderDrawer extends StatelessWidget {
           Text(
             user != null
                 ? (user!.name ?? '${user!.prenom ?? ''} ${user!.nom ?? ''}'.trim())
-                : "Welcome, Guest!",
+                : "",
             style: TextStyle(
                 color: theme.whiteColor,
                 fontSize: 18,

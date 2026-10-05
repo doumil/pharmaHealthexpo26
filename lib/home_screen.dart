@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:pharma_health_expo/services/onwillpop_services.dart';
 import 'package:pharma_health_expo/constants.dart';
 import 'package:pharma_health_expo/model/user_model.dart';
@@ -11,7 +12,12 @@ import 'package:pharma_health_expo/login_screen.dart';
 import 'package:pharma_health_expo/providers/menu_provider.dart';
 import 'package:pharma_health_expo/providers/theme_provider.dart';
 import 'package:pharma_health_expo/global/app_config.dart';
-import 'package:pharma_health_expo/auth_popup.dart'; // 👈 استدعاء الـ Popup
+import 'package:pharma_health_expo/auth_popup.dart';
+import 'package:pharma_health_expo/api_services/event_contact_api_service.dart';
+import 'package:pharma_health_expo/model/event_contact_model.dart';
+import 'package:pharma_health_expo/api_services/exhibitor_api_service.dart';
+import 'package:pharma_health_expo/model/exhibitors_model.dart';
+import 'package:pharma_health_expo/details/DetailExhibitors.dart';
 import 'model/app_theme_data.dart';
 import 'main.dart';
 
@@ -46,10 +52,16 @@ class _HomeScreenState extends State<HomeScreen> {
   late SharedPreferences prefs;
   bool _isLoggedIn = false;
 
+  final EventContactApiService _contactApiService = EventContactApiService();
+  final ExhibitorApiService _exhibitorApiService = ExhibitorApiService();
+
+  late Future<Map<String, dynamic>> _homeInfoFuture;
+
   @override
   void initState() {
     super.initState();
     _initializeUserAndToken();
+    _homeInfoFuture = _fetchHomeDynamicData();
   }
 
   Future<void> _initializeUserAndToken() async {
@@ -73,6 +85,30 @@ class _HomeScreenState extends State<HomeScreen> {
       _isLoggedIn = authToken != null && authToken.isNotEmpty;
       _loggedInUser = userFromWidget ?? userFromPrefs;
     });
+  }
+
+  Future<Map<String, dynamic>> _fetchHomeDynamicData() async {
+    EventContactModel? eventDetails;
+    List<ExhibitorsClass> platinumSponsors = [];
+    try {
+      eventDetails = await _contactApiService.fetchEventDetails();
+    } catch (e) {
+      debugPrint("Error fetching event details: $e");
+    }
+
+    try {
+      final List<ExhibitorsClass> allExhibitors = await _exhibitorApiService.getExhibitors();
+      platinumSponsors = allExhibitors
+          .where((e) => e.expositionType?.toLowerCase() == 'sponsor' && e.sponsorType?.toLowerCase().trim() == 'platinum')
+          .toList();
+    } catch (e) {
+      debugPrint("Error fetching platinum sponsors: $e");
+    }
+
+    return {
+      'event': eventDetails,
+      'platinumSponsors': platinumSponsors,
+    };
   }
 
   Future<void> _logoutConfirmed() async {
@@ -119,6 +155,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _launchMapUrl(String address) async {
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
   List<MenuItem> _getAllMenuItems(MenuConfig? menuConfig) {
     final bool isProgramActive = menuConfig?.program ?? true;
 
@@ -154,13 +197,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return GestureDetector(
       onTap: item.isEnabled ? () {
-        // التحقق واش القسم محمي واليوزر مشي مسجل
         bool isProtected = item.section == DrawerSections.myBadge ||
             item.section == DrawerSections.myAgenda ||
             item.section == DrawerSections.networking;
 
         if (!_isLoggedIn && isProtected) {
-          AuthPopup.show(context); // 👈 إظهار بوب أب تسجيل الدخول
+          AuthPopup.show(context);
         } else {
           widget.onNavigate(item.section);
         }
@@ -169,12 +211,12 @@ class _HomeScreenState extends State<HomeScreen> {
         height: cardHeight,
         decoration: BoxDecoration(
           color: item.isEnabled
-              ? theme.primaryColor.withOpacity(0.1)
-              : Colors.white.withOpacity(0.05),
+              ? theme.primaryColor.withOpacity(0.18)
+              : Colors.white.withOpacity(0.03),
           borderRadius: BorderRadius.circular(20.0),
           border: Border.all(
               color: item.isEnabled
-                  ? theme.whiteColor.withOpacity(0.2)
+                  ? theme.whiteColor.withOpacity(0.15)
                   : Colors.white.withOpacity(0.05)
           ),
         ),
@@ -204,6 +246,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _formatDateShort(String dateString) {
+    final dateTime = DateTime.tryParse(dateString);
+    if (dateTime == null) return dateString;
+    final monthMap = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'};
+    return '${dateTime.day} ${monthMap[dateTime.month]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -211,10 +260,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = themeProvider.currentTheme;
-
-    String displayName = _isLoggedIn
-        ? (_loggedInUser?.prenom ?? _loggedInUser?.name ?? 'User')
-        : 'Visitor';
 
     return Consumer<MenuProvider>(
       builder: (context, menuProvider, child) {
@@ -347,82 +392,307 @@ class _HomeScreenState extends State<HomeScreen> {
           onWillPop: OnWillPop().onWillPop1,
           child: Scaffold(
             appBar: AppBar(
-              title: Center(
-                child: Text(
-                  'Welcome, $displayName!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: theme.whiteColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
               backgroundColor: theme.blackColor,
+              centerTitle: true,
+              title: Image(
+                image: theme.bannerImage,
+                height: 80,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Text(
+                    "Health Expo",
+                    style: TextStyle(color: theme.whiteColor, fontSize: 18, fontWeight: FontWeight.bold),
+                  );
+                },
+              ),
               actions: <Widget>[
-                // زر الخروج يظهر فقط إذا كان اليوزر مسجل دخول
                 if (_isLoggedIn)
-                  IconButton(
-                    icon: Icon(Icons.logout, color: theme.whiteColor),
+                  TextButton.icon(
                     onPressed: () => _showLogoutConfirmationDialog(context, theme),
-                    tooltip: 'Logout',
+                    icon: Icon(Icons.logout, color: theme.secondaryColor, size: 18),
+                    label: Text(
+                      "Logout",
+                      style: TextStyle(color: theme.secondaryColor, fontWeight: FontWeight.bold),
+                    ),
                   )
                 else
-                  TextButton(
+                  TextButton.icon(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const LoginScreen()),
                       );
                     },
-                    child: Text(
+                    icon: Icon(Icons.login, color: theme.secondaryColor, size: 18),
+                    label: Text(
                       "Login",
                       style: TextStyle(color: theme.secondaryColor, fontWeight: FontWeight.bold),
                     ),
                   ),
+                const SizedBox(width: 8),
               ],
               elevation: 0,
             ),
-            body: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints viewportConstraints) {
-                return SingleChildScrollView(
-                  child: FadeInDown(
-                    duration: const Duration(milliseconds: 500),
-                    child: Container(
-                      constraints: BoxConstraints(
-                        minHeight: viewportConstraints.maxHeight,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            theme.blackColor,
-                            theme.primaryColor.withOpacity(0.9),
-                          ],
-                        ),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: height * 0.02),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.fromLTRB(width * 0.04, width * 0.0, width * 0.04, width * 0.01),
-                            child: Image(
-                              image: theme.bannerImage,
-                              height: height * 0.24,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const SizedBox();
-                              },
-                            ),
-                          ),
-                          SizedBox(height: height * 0.01),
-                          ...menuWidgets,
+            body: FutureBuilder<Map<String, dynamic>>(
+              future: _homeInfoFuture,
+              builder: (context, snapshot) {
+                // إظهار شاشة التحميل (Loading) إلى أن يتم جلب تفاصيل الإيفنت والسبونسورات بالكامل
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          theme.blackColor,
+                          theme.primaryColor.withOpacity(0.9),
                         ],
                       ),
                     ),
-                  ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: theme.secondaryColor,
+                      ),
+                    ),
+                  );
+                }
+
+                String dateText = "Loading dates...";
+                String locationText = "DoubleTree by Hilton Casablanca";
+                List<ExhibitorsClass> platinumList = [];
+
+                if (snapshot.hasData) {
+                  final eventData = snapshot.data!['event'] as EventContactModel?;
+                  platinumList = snapshot.data!['platinumSponsors'] as List<ExhibitorsClass>;
+                  if (eventData != null) {
+                    dateText = "${_formatDateShort(eventData.scheduledStartDate)} - ${_formatDateShort(eventData.scheduledEndDate)} ${DateTime.tryParse(eventData.scheduledStartDate)?.year ?? ''}";
+                  }
+                }
+
+                return LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints viewportConstraints) {
+                    return SingleChildScrollView(
+                      child: FadeInDown(
+                        duration: const Duration(milliseconds: 500),
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minHeight: viewportConstraints.maxHeight,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                theme.blackColor,
+                                theme.primaryColor.withOpacity(0.9),
+                              ],
+                            ),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: height * 0.02),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // 1. Logo / Banner الفوق
+                              Container(
+                                padding: EdgeInsets.fromLTRB(width * 0.04, 0, width * 0.04, height * 0.01),
+                                child: Image(
+                                  image: theme.bannerImage,
+                                  height: height * 0.22,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) => const SizedBox(),
+                                ),
+                              ),
+
+                              // 2. Platinum Sponsor Banner Design (يظهر مباشرة مكتمل ومقاد بدون أي وميض أو تأخير)
+                              if (platinumList.isNotEmpty) ...[
+                                SizedBox(
+                                  height: height * 0.24,
+                                  child: PageView.builder(
+                                    itemCount: platinumList.length,
+                                    itemBuilder: (context, index) {
+                                      final sponsor = platinumList[index];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => DetailExhibitorsScreen(exhibitorId: sponsor.id),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(color: theme.secondaryColor.withOpacity(0.4), width: 1.5),
+                                            color: Colors.black54,
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(20),
+                                            child: Stack(
+                                              fit: StackFit.expand,
+                                              children: [
+                                                Image.network(
+                                                  sponsor.image ?? '',
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Container(color: Colors.black45),
+                                                ),
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black.withOpacity(0.65),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  top: 12,
+                                                  left: 0,
+                                                  right: 0,
+                                                  child: Center(
+                                                    child: Text(
+                                                      "Platinum Sponsor",
+                                                      style: TextStyle(
+                                                        color: theme.whiteColor,
+                                                        fontSize: 15,
+                                                        fontWeight: FontWeight.bold,
+                                                        letterSpacing: 1.1,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Center(
+                                                  child: Container(
+                                                    width: 105,
+                                                    height: 105,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.white,
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black.withOpacity(0.3),
+                                                          blurRadius: 8,
+                                                          offset: const Offset(0, 4),
+                                                        ),
+                                                      ],
+                                                      border: Border.all(color: theme.secondaryColor, width: 2),
+                                                    ),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.all(14.0),
+                                                      child: Image.network(
+                                                        sponsor.image ?? '',
+                                                        fit: BoxFit.contain,
+                                                        errorBuilder: (_, __, ___) => const Icon(Icons.business, color: Colors.grey, size: 40),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: height * 0.025),
+                              ],
+
+                              // 3. Info Cards (Dates & Location)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        color: theme.primaryColor.withOpacity(0.18),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(color: theme.whiteColor.withOpacity(0.15)),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(Icons.calendar_today_rounded, color: theme.secondaryColor, size: 22),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            dateText,
+                                            style: TextStyle(
+                                              color: theme.whiteColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: width * 0.03),
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        color: theme.primaryColor.withOpacity(0.18),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(color: theme.whiteColor.withOpacity(0.15)),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(Icons.access_time_rounded, color: theme.secondaryColor, size: 22),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            "9:00 AM to 7:00 PM",
+                                            style: TextStyle(
+                                              color: theme.whiteColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: height * 0.015),
+
+                              // Location Card Clickable
+                              GestureDetector(
+                                onTap: () => _launchMapUrl(locationText),
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: theme.primaryColor.withOpacity(0.18),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: theme.whiteColor.withOpacity(0.15)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.location_on_rounded, color: theme.secondaryColor, size: 24),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          locationText,
+                                          style: TextStyle(
+                                            color: theme.whiteColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                      Icon(Icons.open_in_new, size: 18, color: theme.whiteColor.withOpacity(0.7)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(height: height * 0.025),
+
+                              // 4. Main Menu Grid Cards
+                              ...menuWidgets,
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
