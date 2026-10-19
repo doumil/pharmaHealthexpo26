@@ -1,3 +1,5 @@
+// lib/contact_screen.dart
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -35,18 +37,30 @@ class _ContactScreenState extends State<ContactScreen> {
     final response = await http.get(Uri.parse(AppConfig.appSettingsUrl));
     String email = "N/A";
     String phone = "N/A";
+    String logoPath = "";
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      email = json['data']['contact_email']['value'] ?? "N/A";
-      phone = json['data']['support_phone']['value'] ?? "N/A";
+      if (json['data'] != null) {
+        email = json['data']['contact_email']?['value'] ?? "N/A";
+        phone = json['data']['support_phone']?['value'] ?? "N/A";
+
+        // محاولة جلب اللوغو من الـ settings إيلا كان موجود
+        if (json['data']['logo'] != null) {
+          logoPath = json['data']['logo'].toString();
+        }
+      }
     }
 
-    return {'event': eventDetails, 'email': email, 'phone': phone};
+    return {
+      'event': eventDetails,
+      'email': email,
+      'phone': phone,
+      'logo': logoPath,
+    };
   }
 
   Future<void> _launchMapUrl(String address) async {
-    // الرابط اللي طلبتي
     final Uri url = Uri.parse('https://www.google.com/maps/place/DoubleTree+by+Hilton+Casablanca+City+Centre/@33.5957982,-7.6026141,17z/data=!4m9!3m8!1s0xda7cd8eb45d3459:0x52164eacaf45beb2!5m2!4m1!1i2!8m2!3d33.5957938!4d-7.6000392!16s%2Fg%2F11mstmwb5b?entry=ttu&g_ep=EgoyMDI2MDYxNi4wIKXMDSoASAFQAw%3D%3D?q=${Uri.encodeComponent(address)}');
 
     if (await canLaunchUrl(url)) {
@@ -88,13 +102,13 @@ class _ContactScreenState extends State<ContactScreen> {
           if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
 
           final data = snapshot.data!;
-          return _buildContent(context, theme, data['event'], data['email'], data['phone']);
+          return _buildContent(context, theme, data['event'], data['email'], data['phone'], data['logo']);
         },
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, AppThemeData theme, EventContactModel eventData, String email, String phone) {
+  Widget _buildContent(BuildContext context, AppThemeData theme, EventContactModel eventData, String email, String phone, String settingsLogo) {
     String formatDate(String dateString) {
       final dateTime = DateTime.tryParse(dateString);
       if (dateTime == null) return dateString;
@@ -110,6 +124,17 @@ class _ContactScreenState extends State<ContactScreen> {
 
     const String locationAddress = 'DoubleTree by Hilton Casablanca City Centre';
 
+    // تحديد رابط الصورة النهائي (إما من الـ eventData أو الـ settingsLogo أو افتراضي)
+    String logoUrl = '';
+    if (eventData.logoName.isNotEmpty && eventData.logoName != 'default-logo.png') {
+      logoUrl = eventData.logoName.startsWith('http') ? eventData.logoName : '${AppConfig.baseUrl}/${eventData.logoName}';
+    } else if (settingsLogo.isNotEmpty) {
+      logoUrl = settingsLogo.startsWith('http') ? settingsLogo : '${AppConfig.baseUrl}/uploads/$settingsLogo';
+    } else {
+      // رابط بديل في حال لم ترسل الـ API أي لوغو
+      logoUrl = '${AppConfig.baseUrl}/uploads/app-logos/default.png';
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -122,8 +147,11 @@ class _ContactScreenState extends State<ContactScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Image.network(
-                  '${AppConfig.logoBaseUrl}${eventData.logoName}',
+                  logoUrl,
                   height: 150,
+                  headers: const {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                  },
                   errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 75),
                 ),
               ),

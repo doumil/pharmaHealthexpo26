@@ -19,17 +19,21 @@ class AppConfig {
   // ==========================================
   // 🔀 اختار البلاصة اللي بغيت تخدم بيها
   // ==========================================
-  // static const String baseUrl = "https://app-buzz-clone-27072026.de.cloud.africsp.com";
+  //static const String baseUrl = "https://app-buzz-clone-27072026.de.cloud.africsp.com";
   static const String baseUrl = "https://buzzevents.co";
   // ==========================================
 
-  static const String version = "1.0.6";
+  static const String version = "1.0.7";
   static const String registerUrl = "https://badge.pharmahealthexpo.ma";
   static const String logoBaseUrl = "$baseUrl/uploads/";
 
   static String get appSettingsUrl => "$baseUrl/api/events/$eventId/app-settings";
   static String get loginUrl => "$baseUrl/api/login";
   static String get notificationsApiUrl => "$baseUrl/api";
+
+  // 🔗 روابط الـ API الخاصة بالـ Event مركزة هنا
+  static String get eventUrl => "$baseUrl/api/event/$eventId";
+  static String get eventActiveEditionUrl => "$baseUrl/api/event/$eventId/edition_active";
 
   /// 🛡️ دالة عامة للتحقق من الـ Token وإخراج اليوزر إيلا سالا
   static Future<bool> handleApiResponse(dynamic responseBody, BuildContext context) async {

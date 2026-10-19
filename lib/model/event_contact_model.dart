@@ -6,7 +6,7 @@ class EventContactModel {
   final String eventName;
   final String description;
   final String logoName;
-  final OrganizerModel organizer; // Now uses the updated OrganizerModel
+  final OrganizerModel organizer;
   final String scheduledStartDate;
   final String scheduledEndDate;
 
@@ -25,34 +25,22 @@ class EventContactModel {
         ? (json['data'][0] as Map<String, dynamic>? ?? {})
         : {};
 
-    // Safely get data[1] (schedule) and cast it to Map<String, dynamic>
-    final Map<String, dynamic> scheduleData = json['data'] is List && json['data'].length > 1
-        ? (json['data'][1] as Map<String, dynamic>? ?? {})
+    // Safely get the organizer and cast it to Map<String, dynamic>
+    final Map<String, dynamic> organizerData = eventData['organizer'] is Map
+        ? (eventData['organizer'] as Map<String, dynamic>? ?? {})
         : {};
 
-    // Safely get the first organizer and cast it to Map<String, dynamic>
-    final Map<String, dynamic> organizerData = eventData['organisateurs'] is List && eventData['organisateurs'].isNotEmpty
-        ? (eventData['organisateurs'][0] as Map<String, dynamic>? ?? {})
-        : {};
-
-    // Delegate to the new OrganizerModel.fromJson
+    // Delegate to the OrganizerModel.fromJson
     final organizer = OrganizerModel.fromJson(organizerData);
 
-    // Safely access nested schedule data and cast to Map<String, dynamic>
-    final Map<String, dynamic> start = scheduleData['start'] is Map
-        ? (scheduleData['start'] as Map<String, dynamic>? ?? {})
-        : {};
-    final Map<String, dynamic> end = scheduleData['end'] is Map
-        ? (scheduleData['end'] as Map<String, dynamic>? ?? {})
-        : {};
-
     return EventContactModel(
-      eventName: eventData['name'] as String? ?? 'N/A Event Name',
-      description: eventData['description'] as String? ?? 'No description available.',
-      logoName: eventData['logo'] as String? ?? 'default-logo.png',
+      eventName: eventData['name'] as String? ?? 'Pharma Health Expo',
+      description: eventData['description'] as String? ?? 'Application mobile pour Pharma Health Expo',
+      logoName: eventData['logo_name'] as String? ?? eventData['logo'] as String? ?? 'default-logo.png',
       organizer: organizer,
-      scheduledStartDate: start['date'] as String? ?? '2000-01-01 00:00:00.000000',
-      scheduledEndDate: end['date'] as String? ?? '2000-01-01 00:00:00.000000',
+      // 🛠️ قراءة التواريخ مباشرة بالشكل الصحيح الذي أرسلناه من Service
+      scheduledStartDate: eventData['scheduled_start_date'] as String? ?? '',
+      scheduledEndDate: eventData['scheduled_end_date'] as String? ?? '',
     );
   }
 }
